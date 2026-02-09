@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Step 6 – Riwayat Organisasi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    // Ambil data dari localStorage
+    const data = JSON.parse(localStorage.getItem("formKader") || "{}");
+    if (!data.nik) window.location.href = "index.html";
+
+    data.riwayatOrganisasi = data.riwayatOrganisasi || [];
+  </script>
+</head>
+
+<body class="bg-gray-100">
+
+<div class="max-w-md mx-auto p-4">
+  <div class="bg-white rounded-2xl shadow-xl p-6 space-y-4">
+
+    <h2 class="text-lg font-bold text-center">
+      Riwayat Organisasi
+    </h2>
+
+    <div id="list"></div>
+
+    <button onclick="tambah()"
+      class="w-full border border-dashed border-gray-400 py-3 rounded-xl text-sm">
+      + Tambah Organisasi
+    </button>
+
+    <div class="flex gap-3 pt-2">
+      <button onclick="kembali()"
+        class="w-1/2 border py-3 rounded-xl font-semibold">
+        Kembali
+      </button>
+
+      <button onclick="lanjut()"
+        class="w-1/2 bg-red-700 text-white py-3 rounded-xl font-semibold">
+        Review
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const list = document.getElementById("list");
+
+// Fungsi tambah entry organisasi
+function tambah(val = {}) {
+  const idx = data.riwayatOrganisasi.length;
+  data.riwayatOrganisasi.push(val);
+
+  const div = document.createElement("div");
+  div.className = "border rounded-xl p-3 space-y-2 mt-3";
+
+  // Nama organisasi
+  const org = document.createElement("input");
+  org.className = "w-full p-2 border rounded";
+  org.placeholder = "Nama Organisasi";
+  org.value = val.nama || "";
+  org.addEventListener("input", e => data.riwayatOrganisasi[idx].nama = e.target.value);
+
+  // Tahun mulai
+  const tahunMulai = document.createElement("input");
+  tahunMulai.className = "w-full p-2 border rounded";
+  tahunMulai.placeholder = "Tahun Mulai";
+  tahunMulai.value = val.tahunMulai || "";
+  tahunMulai.addEventListener("input", e => data.riwayatOrganisasi[idx].tahunMulai = e.target.value);
+
+  // Tahun selesai
+  const tahunSelesai = document.createElement("input");
+  tahunSelesai.className = "w-full p-2 border rounded";
+  tahunSelesai.placeholder = "Tahun Selesai / Sekarang";
+  tahunSelesai.value = val.tahunSelesai || "";
+  tahunSelesai.addEventListener("input", e => data.riwayatOrganisasi[idx].tahunSelesai = e.target.value);
+
+  // Jabatan / Peran
+  const jabatan = document.createElement("input");
+  jabatan.className = "w-full p-2 border rounded";
+  jabatan.placeholder = "Jabatan / Peran";
+  jabatan.value = val.jabatan || "";
+  jabatan.addEventListener("input", e => data.riwayatOrganisasi[idx].jabatan = e.target.value);
+
+  div.appendChild(org);
+  div.appendChild(tahunMulai);
+  div.appendChild(tahunSelesai);
+  div.appendChild(jabatan);
+
+  list.appendChild(div);
+}
+
+// Fungsi lanjut ke review
+function lanjut() {
+  localStorage.setItem("formKader", JSON.stringify(data));
+  window.location.href = "review.html";
+}
+
+// Fungsi kembali ke step5
+function kembali() {
+  localStorage.setItem("formKader", JSON.stringify(data));
+  window.location.href = "step5.html";
+}
+
+// Jika belum ada entry, buat satu default
+if (data.riwayatOrganisasi.length === 0) tambah();
+</script>
+
+</body>
+</html>
