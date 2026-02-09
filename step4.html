@@ -3,55 +3,87 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Step 4 – Pendidikan Kader</title>
+<title>Step 3 – Pendidikan Formal</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
-
 <div class="max-w-md mx-auto p-4">
 <div class="bg-white rounded-2xl shadow-xl p-6 space-y-4">
 
-<h2 class="text-lg font-bold text-center">Pendidikan Kader / Diklat Partai</h2>
-
+<h2 class="text-lg font-bold text-center">Pendidikan Formal</h2>
 <div id="list"></div>
-
-<button onclick="tambah()" class="w-full border border-dashed py-3 rounded-xl text-sm">+ Tambah Pendidikan Kader</button>
+<button onclick="tambah()" class="w-full border border-dashed py-3 rounded-xl text-sm">+ Tambah Pendidikan</button>
 
 <div class="flex gap-3 pt-2">
   <button onclick="kembali()" class="w-1/2 border py-3 rounded-xl font-semibold">Kembali</button>
   <button onclick="lanjut()" class="w-1/2 bg-red-700 text-white py-3 rounded-xl font-semibold">Lanjut</button>
 </div>
-
 </div></div>
 
 <script>
-const data = JSON.parse(localStorage.getItem("formKader") || "{}");
-if (!data.nik) window.location.href = "step1.html";
-data.pendidikanKader = data.pendidikanKader || [];
+const data = JSON.parse(localStorage.getItem("formKader")||"{}");
+if(!data.nik) window.location.href="step1.html";
+data.pendidikanFormal = data.pendidikanFormal||[];
 
 function tambah(val={}) {
-  const idx = data.pendidikanKader.length;
-  data.pendidikanKader.push(val);
-
+  const idx = data.pendidikanFormal.length;
+  data.pendidikanFormal.push(val);
   const div = document.createElement("div");
   div.className = "border rounded-xl p-3 space-y-2 mt-3";
+
   div.innerHTML = `
-    <input class="w-full p-2 border rounded" placeholder="Nama Pendidikan / Diklat" oninput="data.pendidikanKader[${idx}].nama=this.value">
-    <input class="w-full p-2 border rounded" placeholder="Tahun" oninput="data.pendidikanKader[${idx}].tahun=this.value">
-    <input class="w-full p-2 border rounded" placeholder="Penyelenggara" oninput="data.pendidikanKader[${idx}].penyelenggara=this.value">
+  <select class="w-full p-2 border rounded" onchange="
+    data.pendidikanFormal[${idx}].jenjang=this.value;
+    const jurusanDiv = this.parentElement.querySelector('.jurusanDiv');
+    const fakultasDiv = this.parentElement.querySelector('.fakultasDiv');
+    if(this.value==='SMA'){ jurusanDiv.style.display='block'; fakultasDiv.style.display='none'; }
+    else if(['D1','D2','D3','S1','S2','S3'].includes(this.value)){ jurusanDiv.style.display='none'; fakultasDiv.style.display='block'; }
+    else{ jurusanDiv.style.display='none'; fakultasDiv.style.display='none'; }">
+    <option value="">Pilih Jenjang</option>
+    <option value="SD">SD</option>
+    <option value="SMP">SMP</option>
+    <option value="SMA">SMA</option>
+    <option value="D1">D1</option>
+    <option value="D2">D2</option>
+    <option value="D3">D3</option>
+    <option value="S1">S1</option>
+    <option value="S2">S2</option>
+    <option value="S3">S3</option>
+  </select>
+
+  <input class="w-full p-2 border rounded mt-1" placeholder="Nama Sekolah/Universitas" oninput="data.pendidikanFormal[${idx}].nama=this.value">
+  <input class="w-full p-2 border rounded mt-1" placeholder="Tahun Lulus" oninput="data.pendidikanFormal[${idx}].tahun=this.value">
+
+  <div class="jurusanDiv" style="display:none;">
+    <select class="w-full p-2 border rounded mt-1" onchange="data.pendidikanFormal[${idx}].jurusan=this.value">
+      <option value="">Jurusan SMA</option>
+      <option value="IPA">IPA</option>
+      <option value="IPS">IPS</option>
+      <option value="Bahasa">Bahasa</option>
+    </select>
+  </div>
+
+  <div class="fakultasDiv" style="display:none;">
+    <input class="w-full p-2 border rounded mt-1" placeholder="Fakultas" oninput="data.pendidikanFormal[${idx}].fakultas=this.value">
+    <input class="w-full p-2 border rounded mt-1" placeholder="Jurusan" oninput="data.pendidikanFormal[${idx}].jurusan=this.value">
+  </div>
   `;
   list.appendChild(div);
 }
 
-function lanjut() {
+function lanjut(){
+  for(let pf of data.pendidikanFormal){
+    if(!pf.nama || !pf.tahun){ alert("Nama & Tahun wajib diisi"); return; }
+    if(!/^\d{4}$/.test(pf.tahun)){ alert("Tahun harus 4 digit angka"); return; }
+    if(pf.jenjang==='SMA' && !pf.jurusan){ alert("Pilih jurusan SMA"); return; }
+    if(['D1','D2','D3','S1','S2','S3'].includes(pf.jenjang) && (!pf.fakultas || !pf.jurusan)){ alert("Fakultas & jurusan wajib untuk D1-S3"); return; }
+  }
   localStorage.setItem("formKader", JSON.stringify(data));
-  window.location.href = "step5.html";
+  window.location.href="step4.html";
 }
 
-function kembali() { window.location.href = "step3.html"; }
-
-if (data.pendidikanKader.length === 0) tambah();
+function kembali(){ window.location.href="step2.html"; }
+if(data.pendidikanFormal.length===0) tambah();
 </script>
-
 </body>
 </html>
