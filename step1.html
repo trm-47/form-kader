@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Step 1 – Data Pribadi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+
+  <div class="max-w-md mx-auto p-4">
+
+    <div class="bg-white rounded-2xl shadow p-5 space-y-4">
+
+      <h2 class="text-lg font-bold text-center">
+        Data Pribadi
+      </h2>
+
+      <div>
+        <label class="text-sm text-gray-600">Nama Lengkap</label>
+        <input
+          id="nama"
+          class="w-full mt-1 p-3 border rounded-xl"
+          placeholder="Nama lengkap"
+        />
+      </div>
+
+      <div>
+        <label class="text-sm text-gray-600">NIK</label>
+        <input
+          id="nik"
+          class="w-full mt-1 p-3 border rounded-xl"
+          placeholder="Nomor Induk Kependudukan"
+        />
+      </div>
+
+      <button
+        onclick="lanjut()"
+        class="w-full bg-red-700 text-white py-3 rounded-xl font-semibold"
+      >
+        Lanjut
+      </button>
+
+    </div>
+
+  </div>
+
+<script>
+function lanjut() {
+  const data = {
+    nama: document.getElementById("nama").value.trim(),
+    nik: document.getElementById("nik").value.trim()
+  };
+
+  if (!data.nama || !data.nik) {
+    alert("Nama dan NIK wajib diisi");
+    return;
+  }
+
+  localStorage.setItem("formData", JSON.stringify(data));
+  window.location.href = "step2.html";
+}
+</script>
+
+</body>
+</html>
