@@ -1,15 +1,10 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Step 6 – Organisasi Kemasyarakatan</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Step 6 – Riwayat Organisasi</title>
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <script>
-    const data = JSON.parse(localStorage.getItem("formKader") || "{}");
-    if (!data.nik) window.location.href = "index.html";
-  </script>
 </head>
 <body class="bg-gray-100">
 
@@ -19,8 +14,7 @@
 
     <div id="list"></div>
 
-    <button onclick="tambah()"
-      class="w-full border border-dashed py-3 rounded-xl text-sm">
+    <button onclick="tambah()" class="w-full border border-dashed py-3 rounded-xl text-sm">
       + Tambah Organisasi
     </button>
 
@@ -32,8 +26,9 @@
 </div>
 
 <script>
+const data = JSON.parse(localStorage.getItem("formKader") || "{}");
+if (!data.nik) window.location.href = "step1.html";
 data.organisasi = data.organisasi || [];
-const list = document.getElementById("list");
 
 function tambah(val = {}) {
   const idx = data.organisasi.length;
@@ -42,31 +37,13 @@ function tambah(val = {}) {
   const div = document.createElement("div");
   div.className = "border rounded-xl p-3 space-y-2 mt-3";
 
-  const orgInput = document.createElement("input");
-  orgInput.className = "w-full p-2 border rounded";
-  orgInput.placeholder = "Nama Organisasi";
-  orgInput.value = val.nama || "";
-  orgInput.addEventListener("input", e => data.organisasi[idx].nama = e.target.value);
+  div.innerHTML = `
+    <input class="w-full p-2 border rounded" placeholder="Nama Organisasi" oninput="data.organisasi[${idx}].nama=this.value">
+    <input class="w-full p-2 border rounded" placeholder="Jabatan" oninput="data.organisasi[${idx}].jabatan=this.value">
+    <input class="w-full p-2 border rounded" placeholder="Tingkatan" oninput="data.organisasi[${idx}].tingkatan=this.value">
+    <input class="w-full p-2 border rounded" placeholder="Periode Tahun" oninput="data.organisasi[${idx}].periode=this.value">
+  `;
 
-  const jabInput = document.createElement("input");
-  jabInput.className = "w-full p-2 border rounded";
-  jabInput.placeholder = "Jabatan";
-  jabInput.value = val.jabatan || "";
-  jabInput.addEventListener("input", e => data.organisasi[idx].jabatan = e.target.value);
-
-  const tingkatInput = document.createElement("input");
-  tingkatInput.className = "w-full p-2 border rounded";
-  tingkatInput.placeholder = "Tingkatan";
-  tingkatInput.value = val.tingkatan || "";
-  tingkatInput.addEventListener("input", e => data.organisasi[idx].tingkatan = e.target.value);
-
-  const periodeInput = document.createElement("input");
-  periodeInput.className = "w-full p-2 border rounded";
-  periodeInput.placeholder = "Periode Tahun";
-  periodeInput.value = val.periode || "";
-  periodeInput.addEventListener("input", e => data.organisasi[idx].periode = e.target.value);
-
-  div.append(orgInput, jabInput, tingkatInput, periodeInput);
   list.appendChild(div);
 }
 
@@ -75,10 +52,7 @@ function lanjut() {
   window.location.href = "step7.html";
 }
 
-function kembali() {
-  localStorage.setItem("formKader", JSON.stringify(data));
-  window.location.href = "step5.html";
-}
+function kembali() { window.location.href = "step5.html"; }
 
 if (data.organisasi.length === 0) tambah();
 </script>
