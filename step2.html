@@ -81,9 +81,8 @@ if (!localStorage.getItem("formKader")) {
 }
 
 const data = JSON.parse(localStorage.getItem("formKader") || "{}");
+if (!data.nik) window.location.href = "index.html";
 
-if (!data.nik) {
-  window.location.href = "index.html";
 }
 
 
