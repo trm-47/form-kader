@@ -7,68 +7,53 @@
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
-
 <div class="max-w-md mx-auto p-4">
-<div class="bg-white rounded-2xl shadow-xl p-6 space-y-6">
+<div class="bg-white rounded-2xl shadow-xl p-6 space-y-4">
 
 <h2 class="text-lg font-bold text-center">Kompetensi & Skill</h2>
 
 <h3 class="font-semibold text-gray-700">Bahasa</h3>
 <div class="flex flex-wrap gap-3">
-  <label class="flex items-center gap-1">
-    <input type="checkbox" value="Indonesia" id="bindo"> Indonesia
-  </label>
-  <label class="flex items-center gap-1">
-    <input type="checkbox" value="Inggris" id="binggris"> Inggris
-  </label>
-  <label class="flex items-center gap-1">
-    <input type="checkbox" value="Mandarin" id="bmandarin"> Mandarin
-  </label>
-  <label class="flex items-center gap-1">
-    <input type="checkbox" value="Lainnya" id="blainnya"> Lainnya
-  </label>
+  <label><input type="checkbox" value="Indonesia" id="bindo"> Indonesia</label>
+  <label><input type="checkbox" value="Inggris" id="binggris"> Inggris</label>
+  <label><input type="checkbox" value="Mandarin" id="bmandarin"> Mandarin</label>
+  <label><input type="checkbox" value="Lainnya" id="blainnya"> Lainnya</label>
 </div>
-<input type="text" id="blainnyaText" placeholder="Lainnya" class="w-full border rounded p-2 mt-2">
+<input type="text" id="blainnyaText" placeholder="Lainnya" class="border rounded p-2 w-full mt-1">
 
 <h3 class="font-semibold text-gray-700">Kemampuan Komputer</h3>
-<div class="flex flex-wrap gap-4 mt-1">
-  <label class="flex items-center gap-1"><input type="radio" name="komputer" value="Tidak Bisa"> Tidak Bisa</label>
-  <label class="flex items-center gap-1"><input type="radio" name="komputer" value="Bisa"> Bisa</label>
-  <label class="flex items-center gap-1"><input type="radio" name="komputer" value="Advance"> Advance</label>
+<div class="flex gap-3">
+  <label><input type="radio" name="komputer" value="Tidak Bisa"> Tidak Bisa</label>
+  <label><input type="radio" name="komputer" value="Bisa"> Bisa</label>
+  <label><input type="radio" name="komputer" value="Advance"> Advance</label>
 </div>
 
-<div class="flex gap-3 pt-4">
+<div class="flex gap-3 pt-2">
   <button onclick="kembali()" class="w-1/2 border py-3 rounded-xl font-semibold">Kembali</button>
   <button onclick="lanjut()" class="w-1/2 bg-red-700 text-white py-3 rounded-xl font-semibold">Lanjut</button>
 </div>
-
-</div>
-</div>
+</div></div>
 
 <script>
-const data = JSON.parse(localStorage.getItem("formKader") || "{}");
-if (!data.nik) window.location.href = "step1.html";
-data.skill = data.skill || {};
+const data = JSON.parse(localStorage.getItem("formKader")||"{}");
+if(!data.nik) window.location.href="step1.html";
+data.skill = data.skill||{};
 
-function lanjut() {
+function lanjut(){
   let bahasa = [];
   ["bindo","binggris","bmandarin"].forEach(id=>{
     if(document.getElementById(id).checked) bahasa.push(document.getElementById(id).value);
   });
-  if(document.getElementById("blainnya").checked && blainnyaText.value.trim()) {
-    bahasa.push(blainnyaText.value.trim());
-  }
-
+  if(document.getElementById("blainnya").checked && blainnyaText.value.trim()) bahasa.push(blainnyaText.value.trim());
   data.skill.bahasa = bahasa;
+
   const komp = document.querySelector('input[name="komputer"]:checked');
   data.skill.komputer = komp ? komp.value : "";
-  
   localStorage.setItem("formKader", JSON.stringify(data));
-  window.location.href = "step8.html";
+  window.location.href="step8.html";
 }
 
-function kembali() { window.location.href = "step6.html"; }
+function kembali(){ window.location.href="step6.html"; }
 </script>
-
 </body>
 </html>
