@@ -108,7 +108,7 @@ review.appendChild(buatSection("Media Sosial", medsosHtml, "step8.html"));
 // kirim data ke Google Apps Script
 async function kirimData() {
   try {
-    const res = await fetch("https://script.google.com/macros/s/AKfycbwVr7L_Xit7Ej-i04KZRdjng7KVStw-vjUq-vH378U9c0GMuUH7rC3o_6EZf9vfRlGy/exec", {
+    const res = await fetch("https://script.google.com/macros/s/AKfycbyJWz4ExHulZ0z7s5i_hB_JycmClJGRVps2Vdjqhp3yeYqOd_xzKiBJ-a5wkvdtDtsC/exec", {
       method: "POST",
       body: JSON.stringify(data)
     });
