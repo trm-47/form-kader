@@ -47,7 +47,7 @@ if (!data.nik) {
   window.location.href = "index.html";
 }
   const list = document.getElementById("list");
-
+data.pendidikanFormal = data.pendidikanFormal || [];
 
 function tambah(val = {}) {
   const idx = data.pendidikanFormal.length;
