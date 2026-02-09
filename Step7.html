@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Step 7 – Kompetensi & Skill</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    const data = JSON.parse(localStorage.getItem("formKader") || "{}");
+    if (!data.nik) window.location.href = "index.html";
+    data.kompetensi = data.kompetensi || {};
+  </script>
+</head>
+<body class="bg-gray-100">
+
+<div class="max-w-md mx-auto p-4">
+  <div class="bg-white rounded-2xl shadow-xl p-6 space-y-4">
+    <h2 class="text-lg font-bold text-center">Kompetensi & Skill</h2>
+
+    <!-- Kompetensi Bahasa -->
+    <div>
+      <label class="font-semibold">Kompetensi Bahasa:</label>
+      <div class="flex flex-col gap-2 mt-2">
+        <label><input type="checkbox" value="Indonesia" /> Indonesia</label>
+        <label><input type="checkbox" value="Inggris" /> Inggris</label>
+        <label><input type="checkbox" value="Mandarin" /> Mandarin</label>
+        <label>Lainnya: <input type="text" placeholder="Tuliskan bahasa lain" id="bahasaLain" class="border p-1 rounded w-full" /></label>
+      </div>
+    </div>
+
+    <!-- Kemampuan Komputer -->
+    <div>
+      <label class="font-semibold">Kemampuan Komputer:</label>
+      <div class="flex flex-col gap-2 mt-2">
+        <label><input type="radio" name="komputer" value="Tidak Bisa" /> Tidak Bisa</label>
+        <label><input type="radio" name="komputer" value="Bisa" /> Bisa</label>
+        <label><input type="radio" name="komputer" value="Advance" /> Advance</label>
+      </div>
+    </div>
+
+    <div class="flex gap-3 pt-2">
+      <button onclick="kembali()" class="w-1/2 border py-3 rounded-xl font-semibold">Kembali</button>
+      <button onclick="lanjut()" class="w-1/2 bg-red-700 text-white py-3 rounded-xl font-semibold">Lanjut</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+const radios = document.querySelectorAll('input[type="radio"]');
+const inputLain = document.getElementById('bahasaLain');
+
+// Restore saved data
+if (data.kompetensi.bahasa) {
+  checkboxes.forEach(cb => {
+    if (data.kompetensi.bahasa.includes(cb.value)) cb.checked = true;
+  });
+  if (data.kompetensi.bahasaLain) inputLain.value = data.kompetensi.bahasaLain;
+}
+if (data.kompetensi.komputer) {
+  radios.forEach(r => { if (r.value === data.kompetensi.komputer) r.checked = true; });
+}
+
+function lanjut() {
+  // Bahasa
+  data.kompetensi.bahasa = Array.from(checkboxes)
+    .filter(cb => cb.checked && cb.value !== "Lainnya")
+    .map(cb => cb.value);
+  data.kompetensi.bahasaLain = inputLain.value;
+
+  // Komputer
+  const selected = Array.from(radios).find(r => r.checked);
+  data.kompetensi.komputer = selected ? selected.value : "";
+
+  localStorage.setItem("formKader", JSON.stringify(data));
+  window.location.href = "step8.html";
+}
+
+function kembali() {
+  localStorage.setItem("formKader", JSON.stringify(data));
+  window.location.href = "step6.html";
+}
+</script>
+
+</body>
+</html>
