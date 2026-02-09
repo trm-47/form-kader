@@ -15,8 +15,7 @@
     <div id="review"></div>
 
     <div class="flex gap-3 pt-2">
-      <button onclick="editStep()" class="w-1/2 border py-3 rounded-xl font-semibold">✏️ Edit</button>
-      <button onclick="kirim()" class="w-1/2 bg-red-700 text-white py-3 rounded-xl font-semibold">✅ Kirim Data</button>
+      <button onclick="kirim()" class="w-full bg-red-700 text-white py-3 rounded-xl font-semibold">✅ Kirim Data</button>
     </div>
   </div>
 </div>
@@ -27,89 +26,77 @@ if (!data.nik) window.location.href = "step1.html";
 
 const review = document.getElementById("review");
 
-function buatList(title, items, fields) {
+// fungsi buat section dengan tombol edit
+function buatSection(title, contentHtml, stepUrl) {
   const div = document.createElement("div");
   div.className = "space-y-2 border-b pb-2";
 
-  const h = document.createElement("h3");
-  h.className = "font-semibold text-gray-700";
-  h.textContent = title;
+  const h = document.createElement("div");
+  h.className = "flex justify-between items-center";
+  h.innerHTML = `<h3 class="font-semibold text-gray-700">${title}</h3>
+                 <button onclick="window.location.href='${stepUrl}'" class="text-sm text-blue-600 hover:underline">✏️ Edit</button>`;
   div.appendChild(h);
 
-  if (Array.isArray(items) && items.length) {
-    items.forEach((it, idx) => {
-      const p = document.createElement("p");
-      p.className = "text-sm text-gray-600";
-      let teks = fields.map(f => `${f.label}: ${it[f.key] || "-"}`).join(" | ");
-      p.textContent = `${idx+1}. ${teks}`;
-      div.appendChild(p);
-    });
-  } else {
-    div.appendChild(document.createElement("p")).textContent = "-";
-  }
+  const content = document.createElement("div");
+  content.innerHTML = contentHtml;
+  div.appendChild(content);
 
   return div;
 }
 
 // Data Pribadi
-const pribadiDiv = document.createElement("div");
-pribadiDiv.className = "space-y-2 border-b pb-2";
-pribadiDiv.innerHTML = `<h3 class="font-semibold text-gray-700">Data Pribadi</h3>
+let pribadiHtml = `
 <p class="text-sm text-gray-600">Nama: ${data.nama || "-"}</p>
 <p class="text-sm text-gray-600">NIK: ${data.nik || "-"}</p>
 <p class="text-sm text-gray-600">Nomor KTA: ${data.kta || "-"}</p>`;
-review.appendChild(pribadiDiv);
+review.appendChild(buatSection("Data Pribadi", pribadiHtml, "step1.html"));
 
 // Alamat & Kontak
-const alamatDiv = document.createElement("div");
-alamatDiv.className = "space-y-2 border-b pb-2";
-alamatDiv.innerHTML = `<h3 class="font-semibold text-gray-700">Alamat & Kontak</h3>
+let alamatHtml = `
 <p class="text-sm text-gray-600">Alamat: ${data.alamat || "-"}</p>
 <p class="text-sm text-gray-600">RT/RW: ${data.rt || "-"} / ${data.rw || "-"}</p>
 <p class="text-sm text-gray-600">Kelurahan: ${data.kelurahan || "-"}</p>
 <p class="text-sm text-gray-600">Kecamatan: ${data.kecamatan || "-"}</p>
 <p class="text-sm text-gray-600">Kabupaten/Kota: ${data.kabupaten || "-"}</p>
 <p class="text-sm text-gray-600">HP: ${data.hp || "-"}</p>`;
-review.appendChild(alamatDiv);
+review.appendChild(buatSection("Alamat & Kontak", alamatHtml, "step2.html"));
 
 // Pendidikan Kader
-review.appendChild(buatList("Pendidikan Kader", data.pendidikanKader, [
-  {label:"Nama", key:"nama"}, {label:"Tahun", key:"tahun"}, {label:"Penyelenggara", key:"penyelenggara"}
-]));
+let pendidikanHtml = "";
+(data.pendidikanKader || []).forEach((it, idx) => {
+  pendidikanHtml += `<p class="text-sm text-gray-600">${idx+1}. Nama: ${it.nama || "-"} | Tahun: ${it.tahun || "-"} | Penyelenggara: ${it.penyelenggara || "-"}</p>`;
+});
+review.appendChild(buatSection("Pendidikan Kader", pendidikanHtml || "-", "step4.html"));
 
 // Riwayat Jabatan Partai
-review.appendChild(buatList("Riwayat Jabatan Partai", data.jabatanPartai, [
-  {label:"Nama Jabatan", key:"nama"}, {label:"Tingkatan", key:"tingkatan"}, {label:"Periode", key:"periode"}
-]));
+let jabatanHtml = "";
+(data.jabatanPartai || []).forEach((it, idx) => {
+  jabatanHtml += `<p class="text-sm text-gray-600">${idx+1}. Nama Jabatan: ${it.nama || "-"} | Tingkatan: ${it.tingkatan || "-"} | Periode: ${it.periode || "-"}</p>`;
+});
+review.appendChild(buatSection("Riwayat Jabatan Partai", jabatanHtml || "-", "step5.html"));
 
 // Riwayat Organisasi
-review.appendChild(buatList("Riwayat Organisasi", data.organisasi, [
-  {label:"Nama Organisasi", key:"nama"}, {label:"Jabatan", key:"jabatan"}, {label:"Tingkatan", key:"tingkatan"}, {label:"Periode", key:"periode"}
-]));
+let orgHtml = "";
+(data.organisasi || []).forEach((it, idx) => {
+  orgHtml += `<p class="text-sm text-gray-600">${idx+1}. Nama: ${it.nama || "-"} | Jabatan: ${it.jabatan || "-"} | Tingkatan: ${it.tingkatan || "-"} | Periode: ${it.periode || "-"}</p>`;
+});
+review.appendChild(buatSection("Riwayat Organisasi", orgHtml || "-", "step6.html"));
 
 // Kompetensi & Skill
-const skillDiv = document.createElement("div");
-skillDiv.className = "space-y-2 border-b pb-2";
-skillDiv.innerHTML = `<h3 class="font-semibold text-gray-700">Kompetensi & Skill</h3>
+let skillHtml = `
 <p class="text-sm text-gray-600">Bahasa: ${(data.skill?.bahasa || []).join(", ") || "-"}</p>
 <p class="text-sm text-gray-600">Komputer: ${data.skill?.komputer || "-"}</p>`;
-review.appendChild(skillDiv);
+review.appendChild(buatSection("Kompetensi & Skill", skillHtml, "step7.html"));
 
 // Media Sosial
-const medsosDiv = document.createElement("div");
-medsosDiv.className = "space-y-2";
-medsosDiv.innerHTML = `<h3 class="font-semibold text-gray-700">Media Sosial</h3>
+let medsosHtml = `
 <p class="text-sm text-gray-600">Instagram: ${data.medsos?.instagram || "-"}</p>
 <p class="text-sm text-gray-600">Twitter/X: ${data.medsos?.twitter || "-"}</p>
 <p class="text-sm text-gray-600">Facebook: ${data.medsos?.facebook || "-"}</p>
 <p class="text-sm text-gray-600">TikTok: ${data.medsos?.tiktok || "-"}</p>`;
-review.appendChild(medsosDiv);
+review.appendChild(buatSection("Media Sosial", medsosHtml, "step8.html"));
 
-// tombol
-function editStep() {
-  window.location.href = "step1.html";
-}
-
+// tombol kirim
 function kirim() {
   alert("Data berhasil dikirim!\nLihat console untuk data JSON lengkap.");
   console.log("Data Kader:", data);
