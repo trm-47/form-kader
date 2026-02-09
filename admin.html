@@ -6,135 +6,84 @@
 <title>Admin Panel – Data Kader</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"></script>
-<style>
-#cvModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:50; }
-#cvContent { background:white; border-radius:1rem; width:90%; max-width:900px; padding:1.5rem; display:flex; gap:2rem; position:relative; }
-#cvContent img.kader-photo{ width:150px; height:180px; object-fit:cover; border-radius:0.5rem; }
-#cvContent .closeBtn{ position:absolute; top:1rem; right:1rem; cursor:pointer; font-size:1.5rem; font-weight:bold; }
-</style>
 </head>
 <body class="bg-gray-100 p-6">
 
 <h1 class="text-2xl font-bold mb-4 text-center">Admin Panel – Data Kader</h1>
 
-<div class="mb-4 flex flex-wrap gap-4">
-<input type="text" id="search" placeholder="Search nama/NIK/KTA..." class="border p-2 rounded-xl flex-1">
-<select id="filterKab" class="border p-2 rounded-xl">
-  <option value="">Filter Kabupaten/Kota</option>
-</select>
-<select id="filterJenjang" class="border p-2 rounded-xl">
-  <option value="">Filter Jenjang Pendidikan</option>
-</select>
-<select id="filterJabatan" class="border p-2 rounded-xl">
-  <option value="">Filter Jabatan Partai</option>
-</select>
+<div class="mb-4 flex gap-4 flex-wrap">
+  <input type="text" id="search" placeholder="Search nama/NIK/KTA..." class="border p-2 rounded-xl flex-1">
+  <select id="filterJenjang" class="border p-2 rounded-xl">
+    <option value="">Filter Jenjang Pendidikan</option>
+    <option value="SD">SD</option>
+    <option value="SMP">SMP</option>
+    <option value="SMA">SMA</option>
+    <option value="D1">D1</option>
+    <option value="D2">D2</option>
+    <option value="D3">D3</option>
+    <option value="S1">S1</option>
+    <option value="S2">S2</option>
+    <option value="S3">S3</option>
+  </select>
 </div>
 
 <div class="overflow-x-auto">
-<table class="min-w-full bg-white rounded-xl shadow-lg overflow-hidden" id="table">
-<thead class="bg-red-700 text-white">
-<tr>
-<th class="px-4 py-2">Nama</th>
-<th class="px-4 py-2">NIK</th>
-<th class="px-4 py-2">KTA</th>
-<th class="px-4 py-2">Kabupaten/Kota</th>
-<th class="px-4 py-2">Pendidikan</th>
-<th class="px-4 py-2">Jabatan Partai</th>
-</tr>
-</thead>
-<tbody id="tbody"></tbody>
-</table>
+  <table class="min-w-full bg-white rounded-xl shadow-lg overflow-hidden" id="table">
+    <thead class="bg-red-700 text-white">
+      <tr>
+        <th class="px-4 py-2">Foto</th>
+        <th class="px-4 py-2">Nama</th>
+        <th class="px-4 py-2">NIK</th>
+        <th class="px-4 py-2">KTA</th>
+        <th class="px-4 py-2">Pendidikan Formal</th>
+        <th class="px-4 py-2">Pendidikan Kader</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
 </div>
 
-<!-- CV Modal -->
-<div id="cvModal" class="flex">
-<div id="cvContent">
-<span class="closeBtn" onclick="closeCV()">×</span>
-<div class="flex-1">
-<img src="https://i.ibb.co.com/5WyjxSkV/PDI-Perjuangan-3.png">
-<h2 class="text-xl font-bold" id="cvNama"></h2>
-<p><b>NIK:</b> <span id="cvNIK"></span></p>
-<p><b>KTA:</b> <span id="cvKTA"></span></p>
-<p><b>Alamat:</b> <span id="cvAlamat"></span></p>
-<p><b>RT/RW:</b> <span id="cvRTRW"></span></p>
-<p><b>Kelurahan:</b> <span id="cvKelurahan"></span>, <b>Kecamatan:</b> <span id="cvKecamatan"></span></p>
-<p><b>Kabupaten/Kota:</b> <span id="cvKab"></span></p>
-
-<h3 class="font-semibold mt-4">Pendidikan Formal</h3>
-<div id="cvPendidikanFormal"></div>
-
-<h3 class="font-semibold mt-4">Pendidikan Kader</h3>
-<div id="cvPendidikanKader"></div>
-
-<h3 class="font-semibold mt-4">Jabatan Partai</h3>
-<div id="cvJabatan"></div>
-
-<h3 class="font-semibold mt-4">Organisasi</h3>
-<div id="cvOrganisasi"></div>
-
-<h3 class="font-semibold mt-4">Kompetensi & Skill</h3>
-<p id="cvSkill"></p>
-
-<h3 class="font-semibold mt-4">Media Sosial</h3>
-<p id="cvMedsos"></p>
-</div>
-<div>
-<img id="cvPhoto" src="" alt="Foto Kader" class="kader-photo">
-</div>
-</div>
+<!-- Modal Resume -->
+<div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center">
+  <div class="bg-white rounded-xl p-6 max-w-3xl w-full overflow-auto max-h-[90vh]">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-bold">Resume Kader</h2>
+      <button onclick="closeModal()" class="text-red-600 font-bold text-xl">&times;</button>
+    </div>
+    <div class="flex gap-4 mb-4">
+      <img id="modalFoto" src="" class="w-36 h-48 object-cover rounded shadow-md">
+      <div id="modalContent" class="flex-1"></div>
+    </div>
+  </div>
 </div>
 
 <script>
-const endpoint = "https://script.google.com/macros/s/AKfycbwBwOEJbMfoyc-3CT7Q-1cFd4DU-9Sh-Jp3YmRCZGEf7yD7qw3aP2V9ybvOuKNwDeS4/exec"; // ganti sesuai GAS
-let allData=[];
+const endpoint = "PASTE_DOGET_ENDPOINT_APPS_SCRIPT_DISINI";
+let allData = [];
 
 function renderTable(data){
-  const tbody=document.getElementById("tbody");
-  tbody.innerHTML="";
-  data.forEach(d=>{
-    const tr=document.createElement("tr");
-    tr.className="border-b cursor-pointer hover:bg-gray-100";
-    tr.innerHTML=`<td class="px-4 py-2">${d.nama}</td>
-    <td class="px-4 py-2">${d.nik}</td>
-    <td class="px-4 py-2">${d.kta}</td>
-    <td class="px-4 py-2">${d.kabupaten||"-"}</td>
-    <td class="px-4 py-2">${d.pendidikanFormal.map(p=>p.nama+" ("+p.tahun+")").join("<br>")}</td>
-    <td class="px-4 py-2">${d.jabatanPartai.map(j=>j.nama+" | "+j.tingkatan).join("<br>")}</td>`;
-    tr.onclick=()=>showCV(d);
-    tbody.appendChild(tr);
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+  data.forEach((d, idx)=>{
+    let pendidikanFormal = d.pendidikanFormal.map(p=>`${p.nama} (${p.tahun})`).join("<br>");
+    let pendidikanKader = d.pendidikanKader.map(p=>`${p.nama} (${p.tahun}) | ${p.penyelenggara}`).join("<br>");
+    tbody.innerHTML += `
+      <tr class="border-b cursor-pointer hover:bg-gray-100" onclick="openModal(${idx})">
+        <td class="px-4 py-2"><img src="${d.fotoUrl||'https://via.placeholder.com/100x133'}" class="w-16 h-20 object-cover rounded"></td>
+        <td class="px-4 py-2">${d.nama}</td>
+        <td class="px-4 py-2">${d.nik}</td>
+        <td class="px-4 py-2">${d.kta}</td>
+        <td class="px-4 py-2">${pendidikanFormal}</td>
+        <td class="px-4 py-2">${pendidikanKader}</td>
+      </tr>
+    `;
   });
 }
 
-function showCV(d){
-  document.getElementById("cvNama").innerText=d.nama;
-  document.getElementById("cvNIK").innerText=d.nik;
-  document.getElementById("cvKTA").innerText=d.kta;
-  document.getElementById("cvAlamat").innerText=d.alamat;
-  document.getElementById("cvRTRW").innerText=(d.rt||"-")+"/"+(d.rw||"-");
-  document.getElementById("cvKelurahan").innerText=d.kelurahan||"-";
-  document.getElementById("cvKecamatan").innerText=d.kecamatan||"-";
-  document.getElementById("cvKab").innerText=d.kabupaten||"-";
-
-  document.getElementById("cvPendidikanFormal").innerHTML=d.pendidikanFormal.map(p=>{
-    return `${p.jenjang} | ${p.nama} (${p.tahun}) ${p.jurusan? "| Jurusan: "+p.jurusan:""}`;
-  }).join("<br>");
-  document.getElementById("cvPendidikanKader").innerHTML=d.pendidikanKader.map(p=>{
-    return `${p.nama} (${p.tahun}) | ${p.penyelenggara}`;
-  }).join("<br>");
-  document.getElementById("cvJabatan").innerHTML=d.jabatanPartai.map(j=>`${j.nama} | ${j.tingkatan} | ${j.periode||"-"}`).join("<br>");
-  document.getElementById("cvOrganisasi").innerHTML=d.organisasi.map(o=>`${o.nama} | ${o.jabatan} | ${o.tingkatan} | ${o.periode||"-"}`).join("<br>");
-  document.getElementById("cvSkill").innerText=`Bahasa: ${d.skillBahasa.join(", ")} | Komputer: ${d.kemampuanKomputer}`;
-  document.getElementById("cvMedsos").innerText=`IG: ${d.medsos.instagram||"-"} | TW: ${d.medsos.twitter||"-"} | FB: ${d.medsos.facebook||"-"} | TT: ${d.medsos.tiktok||"-"}`;
-  document.getElementById("cvPhoto").src=d.foto||"https://via.placeholder.com/150x180.png?text=Foto+Kader";
-  document.getElementById("cvModal").style.display="flex";
-}
-
-function closeCV(){ document.getElementById("cvModal").style.display="none"; }
-
 async function fetchData(){
   try{
-    const res=await axios.get(endpoint);
-    allData=res.data;
+    const res = await axios.get(endpoint);
+    allData = res.data;
     renderTable(allData);
   }catch(err){
     console.error(err);
@@ -142,25 +91,47 @@ async function fetchData(){
   }
 }
 
+function openModal(idx){
+  const d = allData[idx];
+  document.getElementById("modalFoto").src = d.fotoUrl||'https://via.placeholder.com/180x240';
+  let html = `
+    <p><strong>Nama:</strong> ${d.nama}</p>
+    <p><strong>NIK:</strong> ${d.nik}</p>
+    <p><strong>No KTA:</strong> ${d.kta}</p>
+    <p><strong>Alamat:</strong> ${d.alamat} | RT/RW: ${d.rt}/${d.rw}</p>
+    <p><strong>Kel/Kec/Kab:</strong> ${d.kelurahan}/${d.kecamatan}/${d.kabupaten}</p>
+    <p><strong>HP:</strong> ${d.hp}</p>
+    <p><strong>Pendidikan Formal:</strong><br>${d.pendidikanFormal.map(p=>`${p.nama} (${p.tahun}) | ${p.jurusan||''}`).join("<br>")}</p>
+    <p><strong>Pendidikan Kader:</strong><br>${d.pendidikanKader.map(p=>`${p.nama} (${p.tahun}) | ${p.penyelenggara}`).join("<br>")}</p>
+    <p><strong>Jabatan Partai:</strong><br>${d.jabatanPartai.map(j=>`${j.nama} | ${j.tingkatan} | ${j.periode}`).join("<br>")}</p>
+    <p><strong>Organisasi:</strong><br>${d.organisasi.map(o=>`${o.nama} | ${o.jabatan} | ${o.tingkatan} | ${o.periode}`).join("<br>")}</p>
+    <p><strong>Bahasa:</strong> ${d.skillBahasa.join(", ")}</p>
+    <p><strong>Komputer:</strong> ${d.kemampuanKomputer}</p>
+    <p><strong>Media Sosial:</strong> IG:${d.medsos.instagram||'-'} | TW:${d.medsos.twitter||'-'} | FB:${d.medsos.facebook||'-'} | TT:${d.medsos.tiktok||'-'}</p>
+  `;
+  document.getElementById("modalContent").innerHTML = html;
+  document.getElementById("modal").classList.remove("hidden");
+}
+
+function closeModal(){
+  document.getElementById("modal").classList.add("hidden");
+}
+
+// Search & filter
 document.getElementById("search").addEventListener("input", e=>{
-  const q=e.target.value.toLowerCase();
-  const filtered=allData.filter(d=>d.nama.toLowerCase().includes(q)||d.nik.includes(q)||d.kta.includes(q));
+  const q = e.target.value.toLowerCase();
+  const filtered = allData.filter(d=>d.nama.toLowerCase().includes(q)||d.nik.includes(q)||d.kta.includes(q));
   renderTable(filtered);
 });
 
 document.getElementById("filterJenjang").addEventListener("change", e=>{
-  const jenjang=e.target.value;
-  const filtered=jenjang? allData.filter(d=>d.pendidikanFormal.some(p=>p.jenjang===jenjang)):allData;
-  renderTable(filtered);
-});
-
-document.getElementById("filterJabatan").addEventListener("change", e=>{
-  const jab=e.target.value;
-  const filtered=jab? allData.filter(d=>d.jabatanPartai.some(j=>j.tingkatan===jab)):allData;
+  const jenjang = e.target.value;
+  const filtered = jenjang ? allData.filter(d=>d.pendidikanFormal.some(p=>p.jenjang==jenjang)) : allData;
   renderTable(filtered);
 });
 
 fetchData();
 </script>
+
 </body>
 </html>
