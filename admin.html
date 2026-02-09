@@ -7,207 +7,160 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"></script>
 <style>
-  /* Modal / Resume */
-  .modal-bg {
-    position: fixed; top:0; left:0; width:100%; height:100%;
-    background: rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index:50;
-  }
-  .modal-content {
-    background:#fff; border-radius:1rem; max-width:800px; width:90%; padding:2rem; position:relative;
-    display:flex; gap:1rem;
-  }
-  .close-btn {
-    position:absolute; top:1rem; right:1rem; cursor:pointer; font-weight:bold;
-  }
+#cvModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:50; }
+#cvContent { background:white; border-radius:1rem; width:90%; max-width:900px; padding:1.5rem; display:flex; gap:2rem; position:relative; }
+#cvContent img.kader-photo{ width:150px; height:180px; object-fit:cover; border-radius:0.5rem; }
+#cvContent .closeBtn{ position:absolute; top:1rem; right:1rem; cursor:pointer; font-size:1.5rem; font-weight:bold; }
 </style>
 </head>
 <body class="bg-gray-100 p-6">
 
-<h1 class="text-3xl font-bold mb-4 text-center text-red-700">Admin Panel – Data Kader</h1>
+<h1 class="text-2xl font-bold mb-4 text-center">Admin Panel – Data Kader</h1>
 
-<div class="mb-4 flex gap-4 flex-wrap">
-  <input type="text" id="search" placeholder="Search nama/NIK/KTA..." class="border p-2 rounded-xl flex-1">
-  
-  <select id="filterKab" class="border p-2 rounded-xl">
-    <option value="">Filter Kabupaten/Kota</option>
-  </select>
-
-  <select id="filterJenjangForm" class="border p-2 rounded-xl">
-    <option value="">Filter Jenjang Pendidikan Formal</option>
-  </select>
-
-  <select id="filterJenjangKader" class="border p-2 rounded-xl">
-    <option value="">Filter Jenjang Pendidikan Kader</option>
-  </select>
-
-  <select id="filterJabatan" class="border p-2 rounded-xl">
-    <option value="">Filter Jabatan Partai</option>
-  </select>
+<div class="mb-4 flex flex-wrap gap-4">
+<input type="text" id="search" placeholder="Search nama/NIK/KTA..." class="border p-2 rounded-xl flex-1">
+<select id="filterKab" class="border p-2 rounded-xl">
+  <option value="">Filter Kabupaten/Kota</option>
+</select>
+<select id="filterJenjang" class="border p-2 rounded-xl">
+  <option value="">Filter Jenjang Pendidikan</option>
+</select>
+<select id="filterJabatan" class="border p-2 rounded-xl">
+  <option value="">Filter Jabatan Partai</option>
+</select>
 </div>
 
 <div class="overflow-x-auto">
-  <table class="min-w-full bg-white rounded-xl shadow-lg overflow-hidden" id="table">
-    <thead class="bg-red-700 text-white">
-      <tr>
-        <th class="px-4 py-2">Nama</th>
-        <th class="px-4 py-2">NIK</th>
-        <th class="px-4 py-2">KTA</th>
-        <th class="px-4 py-2">Kabupaten/Kota</th>
-        <th class="px-4 py-2">Jenjang Pendidikan</th>
-        <th class="px-4 py-2">Jabatan Partai</th>
-      </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-  </table>
+<table class="min-w-full bg-white rounded-xl shadow-lg overflow-hidden" id="table">
+<thead class="bg-red-700 text-white">
+<tr>
+<th class="px-4 py-2">Nama</th>
+<th class="px-4 py-2">NIK</th>
+<th class="px-4 py-2">KTA</th>
+<th class="px-4 py-2">Kabupaten/Kota</th>
+<th class="px-4 py-2">Pendidikan</th>
+<th class="px-4 py-2">Jabatan Partai</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
 </div>
 
-<!-- Modal Resume -->
-<div class="modal-bg" id="modal">
-  <div class="modal-content">
-    <span class="close-btn" id="closeModal">&times;</span>
-    <div class="flex-1">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Logo_PDI_Perjuangan.svg/1024px-Logo_PDI_Perjuangan.svg.png" class="w-20 mb-4">
-      <h2 class="text-2xl font-bold text-red-700 mb-2" id="modalNama"></h2>
-      <p id="modalKTA"></p>
-      <p id="modalNIK"></p>
-      <p id="modalAlamat"></p>
-      <p id="modalRTRW"></p>
-      <p id="modalKelKecKab"></p>
+<!-- CV Modal -->
+<div id="cvModal" class="flex">
+<div id="cvContent">
+<span class="closeBtn" onclick="closeCV()">×</span>
+<div class="flex-1">
+<img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/PDIP_Logo.svg" alt="PDI Logo" class="w-32 mb-4">
+<h2 class="text-xl font-bold" id="cvNama"></h2>
+<p><b>NIK:</b> <span id="cvNIK"></span></p>
+<p><b>KTA:</b> <span id="cvKTA"></span></p>
+<p><b>Alamat:</b> <span id="cvAlamat"></span></p>
+<p><b>RT/RW:</b> <span id="cvRTRW"></span></p>
+<p><b>Kelurahan:</b> <span id="cvKelurahan"></span>, <b>Kecamatan:</b> <span id="cvKecamatan"></span></p>
+<p><b>Kabupaten/Kota:</b> <span id="cvKab"></span></p>
 
-      <h3 class="font-semibold mt-4">Pendidikan Formal</h3>
-      <div id="modalPendidikanFormal"></div>
+<h3 class="font-semibold mt-4">Pendidikan Formal</h3>
+<div id="cvPendidikanFormal"></div>
 
-      <h3 class="font-semibold mt-4">Pendidikan Kader</h3>
-      <div id="modalPendidikanKader"></div>
+<h3 class="font-semibold mt-4">Pendidikan Kader</h3>
+<div id="cvPendidikanKader"></div>
 
-      <h3 class="font-semibold mt-4">Riwayat Jabatan Partai</h3>
-      <div id="modalJabatan"></div>
+<h3 class="font-semibold mt-4">Jabatan Partai</h3>
+<div id="cvJabatan"></div>
 
-      <h3 class="font-semibold mt-4">Organisasi</h3>
-      <div id="modalOrganisasi"></div>
+<h3 class="font-semibold mt-4">Organisasi</h3>
+<div id="cvOrganisasi"></div>
 
-      <h3 class="font-semibold mt-4">Kompetensi</h3>
-      <div id="modalSkill"></div>
+<h3 class="font-semibold mt-4">Kompetensi & Skill</h3>
+<p id="cvSkill"></p>
 
-      <h3 class="font-semibold mt-4">Media Sosial</h3>
-      <div id="modalMedsos"></div>
-    </div>
-    <div class="w-48">
-      <img src="" id="modalFoto" class="rounded-xl shadow-lg w-full h-auto object-cover">
-    </div>
-  </div>
+<h3 class="font-semibold mt-4">Media Sosial</h3>
+<p id="cvMedsos"></p>
+</div>
+<div>
+<img id="cvPhoto" src="" alt="Foto Kader" class="kader-photo">
+</div>
+</div>
 </div>
 
 <script>
-const endpoint = "https://script.google.com/macros/s/AKfycbxcZqExieC2H5zw3FHkwRVcpS_3hsrmPIwluH0dnmzmIk1BYjDAk2lyVQHArK8CA7zW/exec";
-let allData = [];
+const endpoint = "PASTE_DOGET_ENDPOINT_APPS_SCRIPT_DISINI"; // ganti sesuai GAS
+let allData=[];
 
-// Render tabel
-function renderTable(data) {
-  const tbody = document.getElementById("tbody");
-  tbody.innerHTML = "";
-  data.forEach((d, idx) => {
-    const jenjang = d.pendidikanFormal.map(p=>p.jenjang).join(", ");
-    const kab = d.kabupaten || "-";
-    const jabatan = d.jabatanPartai.map(j=>j.nama).join(", ");
-    const tr = document.createElement("tr");
-    tr.className = "border-b cursor-pointer hover:bg-gray-100";
-    tr.innerHTML = `
-      <td class="px-4 py-2">${d.nama}</td>
-      <td class="px-4 py-2">${d.nik}</td>
-      <td class="px-4 py-2">${d.kta}</td>
-      <td class="px-4 py-2">${kab}</td>
-      <td class="px-4 py-2">${jenjang}</td>
-      <td class="px-4 py-2">${jabatan}</td>
-    `;
-    tr.onclick = () => openModal(d);
+function renderTable(data){
+  const tbody=document.getElementById("tbody");
+  tbody.innerHTML="";
+  data.forEach(d=>{
+    const tr=document.createElement("tr");
+    tr.className="border-b cursor-pointer hover:bg-gray-100";
+    tr.innerHTML=`<td class="px-4 py-2">${d.nama}</td>
+    <td class="px-4 py-2">${d.nik}</td>
+    <td class="px-4 py-2">${d.kta}</td>
+    <td class="px-4 py-2">${d.kabupaten||"-"}</td>
+    <td class="px-4 py-2">${d.pendidikanFormal.map(p=>p.nama+" ("+p.tahun+")").join("<br>")}</td>
+    <td class="px-4 py-2">${d.jabatanPartai.map(j=>j.nama+" | "+j.tingkatan).join("<br>")}</td>`;
+    tr.onclick=()=>showCV(d);
     tbody.appendChild(tr);
   });
 }
 
-// Open modal resume
-function openModal(d) {
-  document.getElementById("modal").style.display = "flex";
-  document.getElementById("modalNama").textContent = d.nama;
-  document.getElementById("modalKTA").textContent = "KTA: " + d.kta;
-  document.getElementById("modalNIK").textContent = "NIK: " + d.nik;
-  document.getElementById("modalAlamat").textContent = "Alamat: " + d.alamat;
-  document.getElementById("modalRTRW").textContent = `RT/RW: ${d.rt || "-"} / ${d.rw || "-"}`;
-  document.getElementById("modalKelKecKab").textContent = `Kel/Kec/Kab: ${d.kelurahan || "-"} / ${d.kecamatan || "-"} / ${d.kabupaten || "-"}`;
-  
-  document.getElementById("modalPendidikanFormal").innerHTML = d.pendidikanFormal.map(p=>`${p.jenjang} | ${p.nama} | ${p.tahun} | ${p.jurusan || "-"}`).join("<br>");
-  document.getElementById("modalPendidikanKader").innerHTML = d.pendidikanKader.map(p=>`${p.nama} | ${p.tahun} | ${p.penyelenggara}`).join("<br>");
-  document.getElementById("modalJabatan").innerHTML = d.jabatanPartai.map(j=>`${j.nama} | ${j.tingkatan} | ${j.periode}`).join("<br>");
-  document.getElementById("modalOrganisasi").innerHTML = d.organisasi.map(o=>`${o.nama} | ${o.jabatan} | ${o.tingkatan} | ${o.periode}`).join("<br>");
-  document.getElementById("modalSkill").innerHTML = `Bahasa: ${d.skillBahasa.join(", ")} | Komputer: ${d.kemampuanKomputer}`;
-  document.getElementById("modalMedsos").innerHTML = `IG: ${d.medsos.instagram||"-"} | TW: ${d.medsos.twitter||"-"} | FB: ${d.medsos.facebook||"-"} | TT: ${d.medsos.tiktok||"-"}`;
-  document.getElementById("modalFoto").src = d.foto || "https://via.placeholder.com/150";
+function showCV(d){
+  document.getElementById("cvNama").innerText=d.nama;
+  document.getElementById("cvNIK").innerText=d.nik;
+  document.getElementById("cvKTA").innerText=d.kta;
+  document.getElementById("cvAlamat").innerText=d.alamat;
+  document.getElementById("cvRTRW").innerText=(d.rt||"-")+"/"+(d.rw||"-");
+  document.getElementById("cvKelurahan").innerText=d.kelurahan||"-";
+  document.getElementById("cvKecamatan").innerText=d.kecamatan||"-";
+  document.getElementById("cvKab").innerText=d.kabupaten||"-";
+
+  document.getElementById("cvPendidikanFormal").innerHTML=d.pendidikanFormal.map(p=>{
+    return `${p.jenjang} | ${p.nama} (${p.tahun}) ${p.jurusan? "| Jurusan: "+p.jurusan:""}`;
+  }).join("<br>");
+  document.getElementById("cvPendidikanKader").innerHTML=d.pendidikanKader.map(p=>{
+    return `${p.nama} (${p.tahun}) | ${p.penyelenggara}`;
+  }).join("<br>");
+  document.getElementById("cvJabatan").innerHTML=d.jabatanPartai.map(j=>`${j.nama} | ${j.tingkatan} | ${j.periode||"-"}`).join("<br>");
+  document.getElementById("cvOrganisasi").innerHTML=d.organisasi.map(o=>`${o.nama} | ${o.jabatan} | ${o.tingkatan} | ${o.periode||"-"}`).join("<br>");
+  document.getElementById("cvSkill").innerText=`Bahasa: ${d.skillBahasa.join(", ")} | Komputer: ${d.kemampuanKomputer}`;
+  document.getElementById("cvMedsos").innerText=`IG: ${d.medsos.instagram||"-"} | TW: ${d.medsos.twitter||"-"} | FB: ${d.medsos.facebook||"-"} | TT: ${d.medsos.tiktok||"-"}`;
+  document.getElementById("cvPhoto").src=d.foto||"https://via.placeholder.com/150x180.png?text=Foto+Kader";
+  document.getElementById("cvModal").style.display="flex";
 }
 
-// Close modal
-document.getElementById("closeModal").onclick = () => document.getElementById("modal").style.display="none";
+function closeCV(){ document.getElementById("cvModal").style.display="none"; }
 
-// Fetch data
-async function fetchData() {
-  try {
-    const res = await axios.get(endpoint);
-    allData = res.data;
-
-    // Isi dropdown filter otomatis
-    const kabSet = new Set(); const jenFormSet = new Set(); const jenKaderSet = new Set(); const jabSet = new Set();
-    allData.forEach(d=>{
-      if(d.kabupaten) kabSet.add(d.kabupaten);
-      d.pendidikanFormal.forEach(p=>jenFormSet.add(p.jenjang));
-      d.pendidikanKader.forEach(p=>jenKaderSet.add(p.jenjang || "Kader"));
-      d.jabatanPartai.forEach(j=>jabSet.add(j.nama));
-    });
-    const fillSelect = (selId,set) => {
-      const sel = document.getElementById(selId);
-      sel.innerHTML = `<option value="">Filter ${selId}</option>`;
-      Array.from(set).sort().forEach(v=>{
-        sel.innerHTML += `<option value="${v}">${v}</option>`;
-      });
-    };
-    fillSelect("filterKab", kabSet);
-    fillSelect("filterJenjangForm", jenFormSet);
-    fillSelect("filterJenjangKader", jenKaderSet);
-    fillSelect("filterJabatan", jabSet);
-
+async function fetchData(){
+  try{
+    const res=await axios.get(endpoint);
+    allData=res.data;
     renderTable(allData);
-  } catch(err) {
+  }catch(err){
     console.error(err);
     alert("Gagal ambil data.");
   }
 }
 
-// Filter search & dropdown
-function applyFilters() {
-  const q = document.getElementById("search").value.toLowerCase();
-  const kab = document.getElementById("filterKab").value;
-  const jenForm = document.getElementById("filterJenjangForm").value;
-  const jenKader = document.getElementById("filterJenjangKader").value;
-  const jab = document.getElementById("filterJabatan").value;
-
-  let filtered = allData.filter(d=>{
-    let matchSearch = d.nama.toLowerCase().includes(q) || d.nik.includes(q) || d.kta.includes(q);
-    let matchKab = !kab || d.kabupaten === kab;
-    let matchJenForm = !jenForm || d.pendidikanFormal.some(p=>p.jenjang===jenForm);
-    let matchJenKader = !jenKader || d.pendidikanKader.some(p=>p.jenjang===jenKader);
-    let matchJab = !jab || d.jabatanPartai.some(j=>j.nama===jab);
-    return matchSearch && matchKab && matchJenForm && matchJenKader && matchJab;
-  });
-
+document.getElementById("search").addEventListener("input", e=>{
+  const q=e.target.value.toLowerCase();
+  const filtered=allData.filter(d=>d.nama.toLowerCase().includes(q)||d.nik.includes(q)||d.kta.includes(q));
   renderTable(filtered);
-}
+});
 
-document.getElementById("search").addEventListener("input", applyFilters);
-document.getElementById("filterKab").addEventListener("change", applyFilters);
-document.getElementById("filterJenjangForm").addEventListener("change", applyFilters);
-document.getElementById("filterJenjangKader").addEventListener("change", applyFilters);
-document.getElementById("filterJabatan").addEventListener("change", applyFilters);
+document.getElementById("filterJenjang").addEventListener("change", e=>{
+  const jenjang=e.target.value;
+  const filtered=jenjang? allData.filter(d=>d.pendidikanFormal.some(p=>p.jenjang===jenjang)):allData;
+  renderTable(filtered);
+});
+
+document.getElementById("filterJabatan").addEventListener("change", e=>{
+  const jab=e.target.value;
+  const filtered=jab? allData.filter(d=>d.jabatanPartai.some(j=>j.tingkatan===jab)):allData;
+  renderTable(filtered);
+});
 
 fetchData();
 </script>
-
 </body>
 </html>
