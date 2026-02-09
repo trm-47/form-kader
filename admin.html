@@ -6,13 +6,43 @@
 <title>Admin Panel – Data Kader</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"></script>
+<style>
+  /* Modal / Resume */
+  .modal-bg {
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index:50;
+  }
+  .modal-content {
+    background:#fff; border-radius:1rem; max-width:800px; width:90%; padding:2rem; position:relative;
+    display:flex; gap:1rem;
+  }
+  .close-btn {
+    position:absolute; top:1rem; right:1rem; cursor:pointer; font-weight:bold;
+  }
+</style>
 </head>
 <body class="bg-gray-100 p-6">
 
-<h1 class="text-2xl font-bold mb-4 text-center">Admin Panel – Data Kader</h1>
+<h1 class="text-3xl font-bold mb-4 text-center text-red-700">Admin Panel – Data Kader</h1>
 
 <div class="mb-4 flex gap-4 flex-wrap">
   <input type="text" id="search" placeholder="Search nama/NIK/KTA..." class="border p-2 rounded-xl flex-1">
+  
+  <select id="filterKab" class="border p-2 rounded-xl">
+    <option value="">Filter Kabupaten/Kota</option>
+  </select>
+
+  <select id="filterJenjangForm" class="border p-2 rounded-xl">
+    <option value="">Filter Jenjang Pendidikan Formal</option>
+  </select>
+
+  <select id="filterJenjangKader" class="border p-2 rounded-xl">
+    <option value="">Filter Jenjang Pendidikan Kader</option>
+  </select>
+
+  <select id="filterJabatan" class="border p-2 rounded-xl">
+    <option value="">Filter Jabatan Partai</option>
+  </select>
 </div>
 
 <div class="overflow-x-auto">
@@ -22,7 +52,9 @@
         <th class="px-4 py-2">Nama</th>
         <th class="px-4 py-2">NIK</th>
         <th class="px-4 py-2">KTA</th>
-        <th class="px-4 py-2">Detail</th>
+        <th class="px-4 py-2">Kabupaten/Kota</th>
+        <th class="px-4 py-2">Jenjang Pendidikan</th>
+        <th class="px-4 py-2">Jabatan Partai</th>
       </tr>
     </thead>
     <tbody id="tbody"></tbody>
@@ -30,70 +62,149 @@
 </div>
 
 <!-- Modal Resume -->
-<div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden">
-  <div class="bg-white rounded-2xl p-6 max-w-xl w-full relative">
-    <button onclick="closeModal()" class="absolute top-2 right-2 text-red-700 font-bold text-xl">&times;</button>
-    <div id="modalContent"></div>
+<div class="modal-bg" id="modal">
+  <div class="modal-content">
+    <span class="close-btn" id="closeModal">&times;</span>
+    <div class="flex-1">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Logo_PDI_Perjuangan.svg/1024px-Logo_PDI_Perjuangan.svg.png" class="w-20 mb-4">
+      <h2 class="text-2xl font-bold text-red-700 mb-2" id="modalNama"></h2>
+      <p id="modalKTA"></p>
+      <p id="modalNIK"></p>
+      <p id="modalAlamat"></p>
+      <p id="modalRTRW"></p>
+      <p id="modalKelKecKab"></p>
+
+      <h3 class="font-semibold mt-4">Pendidikan Formal</h3>
+      <div id="modalPendidikanFormal"></div>
+
+      <h3 class="font-semibold mt-4">Pendidikan Kader</h3>
+      <div id="modalPendidikanKader"></div>
+
+      <h3 class="font-semibold mt-4">Riwayat Jabatan Partai</h3>
+      <div id="modalJabatan"></div>
+
+      <h3 class="font-semibold mt-4">Organisasi</h3>
+      <div id="modalOrganisasi"></div>
+
+      <h3 class="font-semibold mt-4">Kompetensi</h3>
+      <div id="modalSkill"></div>
+
+      <h3 class="font-semibold mt-4">Media Sosial</h3>
+      <div id="modalMedsos"></div>
+    </div>
+    <div class="w-48">
+      <img src="" id="modalFoto" class="rounded-xl shadow-lg w-full h-auto object-cover">
+    </div>
   </div>
 </div>
 
 <script>
-const endpoint="PASTE_DOGET_ENDPOINT_GAS_DISINI";
-let allData=[];
+const endpoint = "PASTE_DOGET_ENDPOINT_APPS_SCRIPT_DISINI";
+let allData = [];
 
-function renderTable(data){
-  const tbody=document.getElementById("tbody");
-  tbody.innerHTML="";
-  data.forEach((d,idx)=>{
-    tbody.innerHTML+=`<tr class="border-b cursor-pointer" onclick="showResume(${idx})">
+// Render tabel
+function renderTable(data) {
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+  data.forEach((d, idx) => {
+    const jenjang = d.pendidikanFormal.map(p=>p.jenjang).join(", ");
+    const kab = d.kabupaten || "-";
+    const jabatan = d.jabatanPartai.map(j=>j.nama).join(", ");
+    const tr = document.createElement("tr");
+    tr.className = "border-b cursor-pointer hover:bg-gray-100";
+    tr.innerHTML = `
       <td class="px-4 py-2">${d.nama}</td>
       <td class="px-4 py-2">${d.nik}</td>
       <td class="px-4 py-2">${d.kta}</td>
-      <td class="px-4 py-2 text-blue-600 hover:underline">Lihat</td>
-    </tr>`;
+      <td class="px-4 py-2">${kab}</td>
+      <td class="px-4 py-2">${jenjang}</td>
+      <td class="px-4 py-2">${jabatan}</td>
+    `;
+    tr.onclick = () => openModal(d);
+    tbody.appendChild(tr);
   });
 }
 
-function showResume(idx){
-  const d=allData[idx];
-  let html=`<div class="flex gap-4">
-    <div class="flex-1">
-      <h2 class="text-xl font-bold">${d.nama}</h2>
-      <p>NIK: ${d.nik}</p>
-      <p>KTA: ${d.kta}</p>
-      <h3 class="font-semibold mt-2">Pendidikan Formal</h3>`;
-  d.pendidikanFormal.forEach(p=>{
-    html+=`<p>${p.nama} (${p.tahun}) ${p.jurusan? "| "+p.jurusan:""}</p>`;
-  });
-  html+=`<h3 class="font-semibold mt-2">Pendidikan Kader</h3>`;
-  d.pendidikanKader.forEach(p=>{
-    html+=`<p>${p.nama} (${p.tahun}) | ${p.penyelenggara}</p>`;
-  });
-  html+=`</div>
-    <div class="w-32"><img src="${d.foto}" class="rounded-xl object-cover w-32 h-32"></div>
-  </div>`;
-  document.getElementById("modalContent").innerHTML=html;
-  document.getElementById("modal").classList.remove("hidden");
+// Open modal resume
+function openModal(d) {
+  document.getElementById("modal").style.display = "flex";
+  document.getElementById("modalNama").textContent = d.nama;
+  document.getElementById("modalKTA").textContent = "KTA: " + d.kta;
+  document.getElementById("modalNIK").textContent = "NIK: " + d.nik;
+  document.getElementById("modalAlamat").textContent = "Alamat: " + d.alamat;
+  document.getElementById("modalRTRW").textContent = `RT/RW: ${d.rt || "-"} / ${d.rw || "-"}`;
+  document.getElementById("modalKelKecKab").textContent = `Kel/Kec/Kab: ${d.kelurahan || "-"} / ${d.kecamatan || "-"} / ${d.kabupaten || "-"}`;
+  
+  document.getElementById("modalPendidikanFormal").innerHTML = d.pendidikanFormal.map(p=>`${p.jenjang} | ${p.nama} | ${p.tahun} | ${p.jurusan || "-"}`).join("<br>");
+  document.getElementById("modalPendidikanKader").innerHTML = d.pendidikanKader.map(p=>`${p.nama} | ${p.tahun} | ${p.penyelenggara}`).join("<br>");
+  document.getElementById("modalJabatan").innerHTML = d.jabatanPartai.map(j=>`${j.nama} | ${j.tingkatan} | ${j.periode}`).join("<br>");
+  document.getElementById("modalOrganisasi").innerHTML = d.organisasi.map(o=>`${o.nama} | ${o.jabatan} | ${o.tingkatan} | ${o.periode}`).join("<br>");
+  document.getElementById("modalSkill").innerHTML = `Bahasa: ${d.skillBahasa.join(", ")} | Komputer: ${d.kemampuanKomputer}`;
+  document.getElementById("modalMedsos").innerHTML = `IG: ${d.medsos.instagram||"-"} | TW: ${d.medsos.twitter||"-"} | FB: ${d.medsos.facebook||"-"} | TT: ${d.medsos.tiktok||"-"}`;
+  document.getElementById("modalFoto").src = d.foto || "https://via.placeholder.com/150";
 }
 
-function closeModal(){ document.getElementById("modal").classList.add("hidden"); }
+// Close modal
+document.getElementById("closeModal").onclick = () => document.getElementById("modal").style.display="none";
 
-async function fetchData(){
-  try{
-    const res=await axios.get(endpoint);
-    allData=res.data;
+// Fetch data
+async function fetchData() {
+  try {
+    const res = await axios.get(endpoint);
+    allData = res.data;
+
+    // Isi dropdown filter otomatis
+    const kabSet = new Set(); const jenFormSet = new Set(); const jenKaderSet = new Set(); const jabSet = new Set();
+    allData.forEach(d=>{
+      if(d.kabupaten) kabSet.add(d.kabupaten);
+      d.pendidikanFormal.forEach(p=>jenFormSet.add(p.jenjang));
+      d.pendidikanKader.forEach(p=>jenKaderSet.add(p.jenjang || "Kader"));
+      d.jabatanPartai.forEach(j=>jabSet.add(j.nama));
+    });
+    const fillSelect = (selId,set) => {
+      const sel = document.getElementById(selId);
+      sel.innerHTML = `<option value="">Filter ${selId}</option>`;
+      Array.from(set).sort().forEach(v=>{
+        sel.innerHTML += `<option value="${v}">${v}</option>`;
+      });
+    };
+    fillSelect("filterKab", kabSet);
+    fillSelect("filterJenjangForm", jenFormSet);
+    fillSelect("filterJenjangKader", jenKaderSet);
+    fillSelect("filterJabatan", jabSet);
+
     renderTable(allData);
-  }catch(err){
+  } catch(err) {
     console.error(err);
     alert("Gagal ambil data.");
   }
 }
 
-document.getElementById("search").addEventListener("input",e=>{
-  const q=e.target.value.toLowerCase();
-  const filtered=allData.filter(d=>d.nama.toLowerCase().includes(q) || d.nik.includes(q) || d.kta.includes(q));
+// Filter search & dropdown
+function applyFilters() {
+  const q = document.getElementById("search").value.toLowerCase();
+  const kab = document.getElementById("filterKab").value;
+  const jenForm = document.getElementById("filterJenjangForm").value;
+  const jenKader = document.getElementById("filterJenjangKader").value;
+  const jab = document.getElementById("filterJabatan").value;
+
+  let filtered = allData.filter(d=>{
+    let matchSearch = d.nama.toLowerCase().includes(q) || d.nik.includes(q) || d.kta.includes(q);
+    let matchKab = !kab || d.kabupaten === kab;
+    let matchJenForm = !jenForm || d.pendidikanFormal.some(p=>p.jenjang===jenForm);
+    let matchJenKader = !jenKader || d.pendidikanKader.some(p=>p.jenjang===jenKader);
+    let matchJab = !jab || d.jabatanPartai.some(j=>j.nama===jab);
+    return matchSearch && matchKab && matchJenForm && matchJenKader && matchJab;
+  });
+
   renderTable(filtered);
-});
+}
+
+document.getElementById("search").addEventListener("input", applyFilters);
+document.getElementById("filterKab").addEventListener("change", applyFilters);
+document.getElementById("filterJenjangForm").addEventListener("change", applyFilters);
+document.getElementById("filterJenjangKader").addEventListener("change", applyFilters);
+document.getElementById("filterJabatan").addEventListener("change", applyFilters);
 
 fetchData();
 </script>
