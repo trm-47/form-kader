@@ -19,12 +19,16 @@
 
     <div>
       <label class="text-sm text-gray-600">NIK</label>
-      <input id="nik" class="w-full mt-1 p-3 border rounded-xl" placeholder="Nomor Induk Kependudukan">
+      <input id="nik" class="w-full mt-1 p-3 border rounded-xl"
+       placeholder="Nomor Induk Kependudukan"
+       maxlength="16" pattern="\d{16}" title="NIK harus 16 angka">
+
     </div>
 
     <div>
       <label class="text-sm text-gray-600">Nomor KTA</label>
       <input id="kta" class="w-full mt-1 p-3 border rounded-xl" placeholder="Nomor KTA PDI Perjuangan">
+      
     </div>
 
     <button onclick="lanjut()" class="w-full bg-red-700 text-white py-3 rounded-xl font-semibold">Lanjut</button>
@@ -33,15 +37,23 @@
 
 <script>
 function lanjut() {
-  const data = {
-    nama: nama.value.trim(),
-    nik: nik.value.trim(),
-    kta: kta.value.trim()
-  };
-  if (!data.nama || !data.nik) { alert("Nama dan NIK wajib diisi"); return; }
+  const namaVal = nama.value.trim();
+  const nikVal = nik.value.trim();
+  const ktaVal = kta.value.trim();
+
+  if(!namaVal) { alert("Nama wajib diisi"); return; }
+  if(!/^\d{16}$/.test(nikVal)) { alert("NIK harus 16 digit angka"); return; }
+  if(ktaVal && ktaVal.length < 5) { alert("Nomor KTA minimal 5 karakter jika diisi"); return; }
+
+  const data = JSON.parse(localStorage.getItem("formKader") || "{}");
+  data.nama = namaVal;
+  data.nik = nikVal;
+  data.kta = ktaVal;
+
   localStorage.setItem("formKader", JSON.stringify(data));
   window.location.href = "step2.html";
 }
+
 </script>
 
 </body>
