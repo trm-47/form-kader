@@ -3,149 +3,124 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Admin – Data Kader</title>
+<title>Admin Panel – Data Kader</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"></script>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 p-6">
 
-<div class="max-w-6xl mx-auto p-6">
-  <h1 class="text-2xl font-bold mb-4">Admin Panel – Data Kader</h1>
+<h1 class="text-2xl font-bold mb-4 text-center">Admin Panel – Data Kader</h1>
 
-  <!-- Filter -->
-  <div class="flex gap-3 mb-4">
-    <select id="filterSMA" class="border p-2 rounded">
-      <option value="">Filter Jurusan SMA</option>
-      <option value="IPA">IPA</option>
-      <option value="IPS">IPS</option>
-      <option value="Bahasa">Bahasa</option>
-    </select>
+<div class="mb-4 flex gap-4 flex-wrap">
+  <input type="text" id="search" placeholder="Search nama/NIK/KTA..." class="border p-2 rounded-xl flex-1">
+  <select id="filterJenjang" class="border p-2 rounded-xl">
+    <option value="">Filter Jenjang Pendidikan</option>
+    <option value="SD">SD</option>
+    <option value="SMP">SMP</option>
+    <option value="SMA">SMA</option>
+    <option value="D1">D1</option>
+    <option value="D2">D2</option>
+    <option value="D3">D3</option>
+    <option value="S1">S1</option>
+    <option value="S2">S2</option>
+    <option value="S3">S3</option>
+  </select>
+</div>
 
-    <select id="filterFakultas" class="border p-2 rounded">
-      <option value="">Filter Fakultas D1-S3</option>
-    </select>
-
-    <input id="search" type="text" placeholder="Search Nama / NIK" class="border p-2 rounded flex-1">
-  </div>
-
-  <div class="overflow-x-auto">
-    <table class="min-w-full bg-white rounded-xl shadow">
-      <thead class="bg-gray-200">
-        <tr>
-          <th class="p-2 border">Nama</th>
-          <th class="p-2 border">NIK</th>
-          <th class="p-2 border">Pendidikan Formal</th>
-          <th class="p-2 border">Pendidikan Kader</th>
-          <th class="p-2 border">Jabatan Partai</th>
-          <th class="p-2 border">Organisasi</th>
-          <th class="p-2 border">Skill</th>
-          <th class="p-2 border">Media Sosial</th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-  </div>
+<div class="overflow-x-auto">
+  <table class="min-w-full bg-white rounded-xl shadow-lg overflow-hidden" id="table">
+    <thead class="bg-red-700 text-white">
+      <tr>
+        <th class="px-4 py-2">Nama</th>
+        <th class="px-4 py-2">NIK</th>
+        <th class="px-4 py-2">KTA</th>
+        <th class="px-4 py-2">Pendidikan</th>
+        <th class="px-4 py-2">Jabatan Partai</th>
+        <th class="px-4 py-2">Organisasi</th>
+        <th class="px-4 py-2">Kompetensi</th>
+        <th class="px-4 py-2">Media Sosial</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
 </div>
 
 <script>
-async function loadData() {
-  // Ganti dengan URL Google Apps Script Web App endpoint
-  const url = "PASTE_ADMIN_GAS_ENDPOINT_DISINI";
-  const res = await fetch(url);
-  const data = await res.json(); // array data
+const endpoint = "PASTE_DOGET_ENDPOINT_APPS_SCRIPT_DISINI";
+let allData = [];
 
+function renderTable(data) {
   const tbody = document.getElementById("tbody");
   tbody.innerHTML = "";
-
-  // ambil fakultas unik untuk dropdown
-  const fakultasSet = new Set();
-  data.forEach(d => {
-    (d.pendidikanFormal||[]).forEach(p=>{
-      if(p.fakultas) fakultasSet.add(p.fakultas);
+  data.forEach(d=>{
+    // Pendidikan HTML
+    let pendidikanHtml = "";
+    d.pendidikanFormal.forEach(p=>{
+      let jurusan = p.jurusan ? ` | Jurusan: ${p.jurusan}` : "";
+      pendidikanHtml += `${p.nama} (${p.tahun})${jurusan}<br>`;
     });
-  });
-  const fakultasFilter = document.getElementById("filterFakultas");
-  fakultasSet.forEach(f => {
-    const opt = document.createElement("option");
-    opt.value = f; opt.textContent = f;
-    fakultasFilter.appendChild(opt);
-  });
+    d.pendidikanKader.forEach(p=>{
+      pendidikanHtml += `${p.nama} (${p.tahun}) | ${p.penyelenggara}<br>`;
+    });
 
-  function renderRow(d) {
-    // Pendidikan Formal
-    const pendidikanStr = (d.pendidikanFormal||[]).map(p=>{
-      let str = p.nama + " (" + p.tahun + ")";
-      if(p.nama==="SMA" && p.jurusan) str += " | Jurusan: "+p.jurusan;
-      if(["D1","D2","D3","S1","S2","S3"].includes(p.nama) && (p.fakultas || p.jurusan)) {
-        str += " | Fakultas: "+(p.fakultas||"-")+" | Jurusan: "+(p.jurusan||"-");
-      }
-      return str;
-    }).join("<br>");
-
-    // Pendidikan Kader
-    const pendidikanKaderStr = (d.pendidikanKader||[]).map(p=>`${p.nama||"-"} (${p.tahun||"-"})`).join("<br>");
-
-    // Jabatan
-    const jabatanStr = (d.jabatanPartai||[]).map(j=>`${j.nama||"-"} (${j.tingkatan||"-"})`).join("<br>");
+    // Jabatan Partai
+    let jabatanHtml = "";
+    d.jabatanPartai.forEach(j=>{
+      jabatanHtml += `${j.nama} | ${j.tingkatan} | ${j.periode}<br>`;
+    });
 
     // Organisasi
-    const orgStr = (d.organisasi||[]).map(o=>`${o.nama||"-"} (${o.jabatan||"-"})`).join("<br>");
-
-    // Skill
-    const skillStr = `Bahasa: ${(d.skill?.bahasa||[]).join(", ")} <br> Komputer: ${d.skill?.komputer||"-"}`;
-
-    // Media Sosial
-    const medsosStr = `IG: ${d.medsos?.instagram||"-"} | TW/X: ${d.medsos?.twitter||"-"} | FB: ${d.medsos?.facebook||"-"} | TT: ${d.medsos?.tiktok||"-"}`;
-
-    return `<tr class="border-b hover:bg-gray-50">
-      <td class="p-2 border">${d.nama||"-"}</td>
-      <td class="p-2 border">${d.nik||"-"}</td>
-      <td class="p-2 border">${pendidikanStr}</td>
-      <td class="p-2 border">${pendidikanKaderStr}</td>
-      <td class="p-2 border">${jabatanStr}</td>
-      <td class="p-2 border">${orgStr}</td>
-      <td class="p-2 border">${skillStr}</td>
-      <td class="p-2 border">${medsosStr}</td>
-    </tr>`;
-  }
-
-  function applyFilter() {
-    const jurusanSMA = document.getElementById("filterSMA").value;
-    const fakultas = document.getElementById("filterFakultas").value;
-    const search = document.getElementById("search").value.toLowerCase();
-
-    tbody.innerHTML = "";
-
-    data.forEach(d=>{
-      let include = true;
-
-      // Filter Jurusan SMA
-      if(jurusanSMA){
-        include = (d.pendidikanFormal||[]).some(p=>p.nama==="SMA" && p.jurusan===jurusanSMA);
-      }
-
-      // Filter Fakultas D1-S3
-      if(include && fakultas){
-        include = (d.pendidikanFormal||[]).some(p=>["D1","D2","D3","S1","S2","S3"].includes(p.nama) && p.fakultas===fakultas);
-      }
-
-      // Search
-      if(include && search){
-        const text = (d.nama+" "+d.nik).toLowerCase();
-        include = text.includes(search);
-      }
-
-      if(include) tbody.innerHTML += renderRow(d);
+    let orgHtml = "";
+    d.organisasi.forEach(o=>{
+      orgHtml += `${o.nama} | ${o.jabatan} | ${o.tingkatan} | ${o.periode}<br>`;
     });
-  }
 
-  document.getElementById("filterSMA").addEventListener("change", applyFilter);
-  document.getElementById("filterFakultas").addEventListener("change", applyFilter);
-  document.getElementById("search").addEventListener("input", applyFilter);
+    // Kompetensi
+    let skillHtml = `Bahasa: ${d.skillBahasa.join(", ")} | Komputer: ${d.kemampuanKomputer}`;
 
-  applyFilter();
+    // Medsos
+    let medsosHtml = `IG: ${d.medsos.instagram||"-"} | TW: ${d.medsos.twitter||"-"} | FB: ${d.medsos.facebook||"-"} | TT: ${d.medsos.tiktok||"-"}`;
+
+    tbody.innerHTML += `<tr class="border-b">
+      <td class="px-4 py-2">${d.nama}</td>
+      <td class="px-4 py-2">${d.nik}</td>
+      <td class="px-4 py-2">${d.kta}</td>
+      <td class="px-4 py-2">${pendidikanHtml}</td>
+      <td class="px-4 py-2">${jabatanHtml}</td>
+      <td class="px-4 py-2">${orgHtml}</td>
+      <td class="px-4 py-2">${skillHtml}</td>
+      <td class="px-4 py-2">${medsosHtml}</td>
+    </tr>`;
+  });
 }
 
-loadData();
+async function fetchData() {
+  try {
+    const res = await axios.get(endpoint);
+    allData = res.data;
+    renderTable(allData);
+  } catch(err) {
+    console.error(err);
+    alert("Gagal ambil data.");
+  }
+}
+
+// Filter search & jenjang
+document.getElementById("search").addEventListener("input", e=>{
+  const q = e.target.value.toLowerCase();
+  const filtered = allData.filter(d=>d.nama.toLowerCase().includes(q) || d.nik.includes(q) || d.kta.includes(q));
+  renderTable(filtered);
+});
+
+document.getElementById("filterJenjang").addEventListener("change", e=>{
+  const jenjang = e.target.value;
+  const filtered = jenjang ? allData.filter(d=>{
+    return d.pendidikanFormal.some(p=>p.nama.toUpperCase().includes(jenjang.toUpperCase()));
+  }) : allData;
+  renderTable(filtered);
+});
+
+fetchData();
 </script>
 
 </body>
