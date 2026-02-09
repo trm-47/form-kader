@@ -6,109 +6,46 @@
   <title>Step 3 – Pendidikan Formal</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-
 <body class="bg-gray-100">
 
 <div class="max-w-md mx-auto p-4">
   <div class="bg-white rounded-2xl shadow-xl p-6 space-y-4">
+    <h2 class="text-lg font-bold text-center">Pendidikan Formal</h2>
 
-    <h2 class="text-lg font-bold text-center">
-      Pendidikan Formal
-    </h2>
-
-    <div id="list"></div>
-
-    <button onclick="tambah()"
-      class="w-full border border-dashed border-gray-400 py-3 rounded-xl text-sm">
-      + Tambah Pendidikan
-    </button>
-
-    <button onclick="window.location.href='step1.html'"
-  class="text-sm text-blue-600 underline">
-  Edit Data Pribadi
-</button>
-
+    <input id="tingkat" placeholder="Tingkat Pendidikan" class="w-full p-3 border rounded-xl">
+    <input id="jurusan" placeholder="Jurusan" class="w-full p-3 border rounded-xl">
+    <input id="sekolah" placeholder="Sekolah / Universitas" class="w-full p-3 border rounded-xl">
+    <input id="tahun" placeholder="Tahun Lulus" class="w-full p-3 border rounded-xl">
 
     <div class="flex gap-3 pt-2">
-      <button onclick="kembali()"
-        class="w-1/2 border py-3 rounded-xl font-semibold">
-        Kembali
-      </button>
-
-      <button onclick="lanjut()"
-        class="w-1/2 bg-red-700 text-white py-3 rounded-xl font-semibold">
-        Lanjut
-      </button>
+      <button onclick="kembali()" class="w-1/2 border py-3 rounded-xl font-semibold">Kembali</button>
+      <button onclick="lanjut()" class="w-1/2 bg-red-700 text-white py-3 rounded-xl font-semibold">Lanjut</button>
     </div>
-
   </div>
 </div>
 
 <script>
 const data = JSON.parse(localStorage.getItem("formKader") || "{}");
-if (!data.nik) window.location.href = "index.html";
+if (!data.nik) window.location.href = "step1.html";
 
-const list = document.getElementById("list");
-data.pendidikanFormal = data.pendidikanFormal || [];
-
-function tambah(val = {}) {
-  const idx = data.pendidikanFormal.length;
-  data.pendidikanFormal.push(val);
-
-  const div = document.createElement("div");
-  div.className = "border rounded-xl p-3 space-y-2 mt-3";
-
-  const select = document.createElement("select");
-  select.className = "w-full p-2 border rounded";
-  select.innerHTML = `
-    <option value="">Jenjang</option>
-    <option>SD</option>
-    <option>SMP</option>
-    <option>SMA / SMK</option>
-    <option>D3</option>
-    <option>S1</option>
-    <option>S2</option>
-    <option>S3</option>
-  `;
-  select.addEventListener("change", e => {
-    data.pendidikanFormal[idx].jenjang = e.target.value;
-  });
-
-  const institusi = document.createElement("input");
-  institusi.className = "w-full p-2 border rounded";
-  institusi.placeholder = "Nama Sekolah / Kampus";
-  institusi.addEventListener("input", e => {
-    data.pendidikanFormal[idx].institusi = e.target.value;
-  });
-
-  const tahun = document.createElement("input");
-  tahun.className = "w-full p-2 border rounded";
-  tahun.placeholder = "Tahun Lulus";
-  tahun.addEventListener("input", e => {
-    data.pendidikanFormal[idx].tahun = e.target.value;
-  });
-
-  div.appendChild(select);
-  div.appendChild(institusi);
-  div.appendChild(tahun);
-
-  list.appendChild(div);
-}
+tingkat.value = data.pendidikan?.tingkat || "";
+jurusan.value = data.pendidikan?.jurusan || "";
+sekolah.value = data.pendidikan?.sekolah || "";
+tahun.value = data.pendidikan?.tahun || "";
 
 function lanjut() {
+  data.pendidikan = {
+    tingkat: tingkat.value.trim(),
+    jurusan: jurusan.value.trim(),
+    sekolah: sekolah.value.trim(),
+    tahun: tahun.value.trim()
+  };
   localStorage.setItem("formKader", JSON.stringify(data));
   window.location.href = "step4.html";
 }
 
-function kembali() {
-  window.location.href = "step2.html";
-}
-
-if (data.pendidikanFormal.length === 0) tambah();
+function kembali() { window.location.href = "step2.html"; }
 </script>
-
-
-
 
 </body>
 </html>
