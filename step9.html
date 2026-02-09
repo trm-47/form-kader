@@ -15,7 +15,9 @@
     <div id="review"></div>
 
     <div class="flex gap-3 pt-2">
-      <button onclick="kirim()" class="w-full bg-red-700 text-white py-3 rounded-xl font-semibold">✅ Kirim Data</button>
+      <button onclick="kirimData()" class="w-full bg-red-700 text-white py-3 rounded-xl font-semibold">
+        ✅ Kirim Data
+      </button>
     </div>
   </div>
 </div>
@@ -61,16 +63,23 @@ let alamatHtml = `
 <p class="text-sm text-gray-600">HP: ${data.hp || "-"}</p>`;
 review.appendChild(buatSection("Alamat & Kontak", alamatHtml, "step2.html"));
 
-// Pendidikan Kader
-let pendidikanHtml = "";
-(data.pendidikanKader || []).forEach((it, idx) => {
-  pendidikanHtml += `<p class="text-sm text-gray-600">${idx+1}. Nama: ${it.nama || "-"} | Tahun: ${it.tahun || "-"} | Penyelenggara: ${it.penyelenggara || "-"}</p>`;
+// Pendidikan Formal
+let pendidikanFormalHtml = "";
+(data.pendidikanFormal || []).forEach((it, idx) => {
+  pendidikanFormalHtml += `<p class="text-sm text-gray-600">${idx+1}. Nama: ${it.nama || "-"} | Tahun: ${it.tahun || "-"} | Lembaga: ${it.lembaga || "-"}</p>`;
 });
-review.appendChild(buatSection("Pendidikan Kader", pendidikanHtml || "-", "step4.html"));
+review.appendChild(buatSection("Pendidikan Formal", pendidikanFormalHtml || "-", "step3.html"));
+
+// Pendidikan Kader
+let pendidikanKaderHtml = "";
+(data.pendidikanKader || []).forEach((it, idx) => {
+  pendidikanKaderHtml += `<p class="text-sm text-gray-600">${idx+1}. Nama: ${it.nama || "-"} | Tahun: ${it.tahun || "-"} | Penyelenggara: ${it.penyelenggara || "-"}</p>`;
+});
+review.appendChild(buatSection("Pendidikan Kader", pendidikanKaderHtml || "-", "step4.html"));
 
 // Riwayat Jabatan Partai
 let jabatanHtml = "";
-(data.jabatanPartai || []).forEach((it, idx) => {
+(data.riwayatJabatan || []).forEach((it, idx) => {
   jabatanHtml += `<p class="text-sm text-gray-600">${idx+1}. Nama Jabatan: ${it.nama || "-"} | Tingkatan: ${it.tingkatan || "-"} | Periode: ${it.periode || "-"}</p>`;
 });
 review.appendChild(buatSection("Riwayat Jabatan Partai", jabatanHtml || "-", "step5.html"));
@@ -96,17 +105,8 @@ let medsosHtml = `
 <p class="text-sm text-gray-600">TikTok: ${data.medsos?.tiktok || "-"}</p>`;
 review.appendChild(buatSection("Media Sosial", medsosHtml, "step8.html"));
 
-// tombol kirim
-function kirim() {
-  alert("Data berhasil dikirim!\nLihat console untuk data JSON lengkap.");
-  console.log("Data Kader:", data);
-  localStorage.removeItem("formKader");
-  window.location.href = "step1.html";
-}
-
-  async function kirimData() {
-  const data = JSON.parse(localStorage.getItem("formKader") || "{}");
-
+// kirim data ke Google Apps Script
+async function kirimData() {
   try {
     const res = await fetch("PASTE_ENDPOINT_APPS_SCRIPT_DISINI", {
       method: "POST",
@@ -116,7 +116,7 @@ function kirim() {
     if (result.status === "success") {
       alert("Data berhasil dikirim!");
       localStorage.removeItem("formKader");
-      window.location.href = "terima.html"; // halaman terima / sukses
+      window.location.href = "terima.html";
     } else {
       alert("Gagal kirim data: " + result.message);
     }
@@ -124,7 +124,6 @@ function kirim() {
     alert("Terjadi error: " + err.message);
   }
 }
-
 </script>
 
 </body>
