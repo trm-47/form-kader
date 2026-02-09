@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Step 9 – Review & Kirim</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+<div class="max-w-3xl mx-auto p-4">
+  <div class="bg-white rounded-2xl shadow-xl p-6 space-y-6">
+    <h2 class="text-xl font-bold text-center">Review Data Kader</h2>
+
+    <div id="review" class="space-y-4"></div>
+
+    <div class="flex gap-3 pt-4">
+      <button onclick="editData()" class="w-1/2 border py-3 rounded-xl font-semibold">✏️ Edit</button>
+      <button onclick="kirimData()" class="w-1/2 bg-red-700 text-white py-3 rounded-xl font-semibold">✅ Kirim Data</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const data = JSON.parse(localStorage.getItem("formKader") || "{}");
+if (!data.nik) window.location.href = "index.html"; // pastikan data ada
+
+const reviewDiv = document.getElementById("review");
+
+function createSection(title, content) {
+  return `
+    <div class="border p-3 rounded-lg">
+      <h3 class="font-bold">${title}</h3>
+      <p class="whitespace-pre-wrap">${content}</p>
+    </div>
+  `;
+}
+
+// Step1: Data Pribadi
+reviewDiv.innerHTML += createSection("Data Pribadi",
+  `NIK: ${data.nik || "-"}
+Nama: ${data.nama || "-"}
+Jenis Kelamin: ${data.jk || "-"}
+Tempat/Tgl Lahir: ${data.ttl || "-"}`
+);
+
+// Step2: Data Kontak
+reviewDiv.innerHTML += createSection("Data Kontak",
+  `Alamat: ${data.alamat || "-"}
+RT/RW: ${data.rtrw || "-"}
+Kel/Desa: ${data.keldesa || "-"}
+Kecamatan: ${data.kecamatan || "-"}
+Kota/Kab: ${data.kotakab || "-"}
+Provinsi: ${data.provinsi || "-"}
+No. HP: ${data.hp || "-"}
+Email: ${data.email || "-"}`
+);
+
+// Step3: Pendidikan Formal
+reviewDiv.innerHTML += createSection("Pendidikan Formal",
+  `Tingkat: ${data.pendidikan?.tingkat || "-"}
+Jurusan: ${data.pendidikan?.jurusan || "-"}
+Sekolah/Universitas: ${data.pendidikan?.sekolah || "-"}
+Tahun Lulus: ${data.pendidikan?.tahun || "-"}`
+);
+
+// Step4: Pendidikan Kader/Diklat Partai
+let diklatContent = data.diklat?.map(d => `Nama: ${d.nama}, Tahun: ${d.tahun}`).join("\n") || "-";
+reviewDiv.innerHTML += createSection("Pendidikan Kader/Diklat Partai", diklatContent);
+
+// Step5: Riwayat Jabatan Partai
+let jabatanContent = data.jabatan?.map(j => `Jabatan: ${j.nama}, Periode: ${j.periode}`).join("\n") || "-";
+reviewDiv.innerHTML += createSection("Riwayat Jabatan Partai", jabatanContent);
+
+// Step6: Riwayat Organisasi Kemasyarakatan
+let orgContent = data.org?.map(o => `Organisasi: ${o.nama}, Jabatan: ${o.jabatan}, Tingkatan: ${o.tingkatan}, Periode: ${o.periode}`).join("\n") || "-";
+reviewDiv.innerHTML += createSection("Riwayat Organisasi Kemasyarakatan", orgContent);
+
+// Step7: Kompetensi & Skill
+let skillContent = `Bahasa: ${(data.skill?.bahasa || []).join(", ") || "-"}
+Komputer: ${data.skill?.komputer || "-"}`
+reviewDiv.innerHTML += createSection("Kompetensi & Skill", skillContent);
+
+// Step8: Media Sosial
+let medsos = data.medsos || {};
+let medsosContent = `Instagram: ${medsos.instagram || "-"}
+Twitter/X: ${medsos.twitter || "-"}
+Facebook: ${medsos.facebook || "-"}
+TikTok: ${medsos.tiktok || "-"}`
+reviewDiv.innerHTML += createSection("Media Sosial", medsosContent);
+
+// Tombol Edit
+function editData() {
+  window.location.href = "step1.html"; // bisa diarahkan ke step1, atau buat dropdown step
+}
+
+// Tombol Kirim Data
+function kirimData() {
+  alert("Data berhasil dikirim!");
+  localStorage.removeItem("formKader");
+  window.location.href = "index.html"; // kembali ke awal
+}
+</script>
+
+</body>
+</html>
