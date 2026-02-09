@@ -37,6 +37,19 @@
 <script>
 const data = JSON.parse(localStorage.getItem("formKader") || "{}");
 if (!data.nik) window.location.href = "step1.html";
+  if(!/^\d+$/.test(rt.value.trim()) || !/^\d+$/.test(rw.value.trim())) {
+  alert("RT/RW harus angka");
+  return;
+}
+if(!/^\d{10,15}$/.test(hp.value.trim())) {
+  alert("No HP harus 10–15 digit angka");
+  return;
+}
+if(email.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
+  alert("Email tidak valid");
+  return;
+}
+
 
 function lanjut() {
   data.alamat = alamat.value.trim();
