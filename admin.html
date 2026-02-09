@@ -1,20 +1,18 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Admin Data Kader</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-  .expand-row { display: none; }
-  .pointer { cursor: pointer; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Kader – Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-100">
 
-<div class="max-w-7xl mx-auto p-4">
-  <h1 class="text-2xl font-bold text-center mb-6">Admin Data Kader</h1>
+<div class="max-w-6xl mx-auto p-6">
 
+  <h1 class="text-2xl font-bold mb-6 text-center">Dashboard Admin Kader</h1>
+
+  <!-- Filter / Search -->
   <div class="flex flex-col md:flex-row gap-4 mb-4">
     <input id="searchBox" type="text" placeholder="Search Nama, NIK, KTA..." 
       class="flex-1 p-2 border rounded-xl shadow-sm">
@@ -28,134 +26,125 @@
     </select>
 
     <button onclick="resetFilters()" class="px-4 py-2 bg-red-700 text-white rounded-xl">Reset</button>
+    <button onclick="exportCSV()" class="px-4 py-2 bg-green-600 text-white rounded-xl">Export CSV</button>
   </div>
 
+  <!-- Table -->
   <div class="overflow-x-auto">
-    <table class="min-w-full bg-white rounded-xl shadow overflow-hidden">
-      <thead class="bg-red-700 text-white">
+    <table class="min-w-full bg-white rounded-xl shadow-lg" id="dataTable">
+      <thead class="bg-gray-200 text-gray-700">
         <tr>
-          <th class="p-3 text-left">#</th>
-          <th class="p-3 text-left">Nama</th>
-          <th class="p-3 text-left">NIK</th>
-          <th class="p-3 text-left">KTA</th>
-          <th class="p-3 text-left">Alamat</th>
-          <th class="p-3 text-left">Tanggal Submit</th>
+          <th class="py-2 px-4 border">Nama</th>
+          <th class="py-2 px-4 border">NIK</th>
+          <th class="py-2 px-4 border">KTA</th>
+          <th class="py-2 px-4 border">Alamat</th>
+          <th class="py-2 px-4 border">Pendidikan Formal</th>
+          <th class="py-2 px-4 border">Pendidikan Kader</th>
+          <th class="py-2 px-4 border">Jabatan Partai</th>
+          <th class="py-2 px-4 border">Organisasi</th>
+          <th class="py-2 px-4 border">Bahasa</th>
+          <th class="py-2 px-4 border">Komputer</th>
+          <th class="py-2 px-4 border">Media Sosial</th>
+          <th class="py-2 px-4 border">Tanggal Submit</th>
         </tr>
       </thead>
-      <tbody id="tableBody"></tbody>
+      <tbody id="tableBody">
+      </tbody>
     </table>
   </div>
+
 </div>
 
 <script>
-const data = <?= JSON.stringify(data) ?>; // dari doGet()
+let allData = [];
+let filteredData = [];
 
-let filteredData = [...data];
+// Ambil data dari Google Sheets JSON (Apps Script Web App URL)
+const SHEET_URL = "PASTE_WEB_APP_URL_DI_SINI";
 
-// buat filter dropdown otomatis dari data
-function populateFilters() {
-  const pendidikanSet = new Set();
-  const diklatSet = new Set();
-
-  data.forEach(d => {
-    (d.pendidikanFormal || []).forEach(p => pendidikanSet.add(p.nama));
-    (d.pendidikanKader || []).forEach(k => diklatSet.add(k.nama));
-  });
-
-  const selP = document.getElementById("filterPendidikan");
-  pendidikanSet.forEach(val => {
-    const opt = document.createElement("option");
-    opt.value = val;
-    opt.innerText = val;
-    selP.appendChild(opt);
-  });
-
-  const selD = document.getElementById("filterDiklat");
-  diklatSet.forEach(val => {
-    const opt = document.createElement("option");
-    opt.value = val;
-    opt.innerText = val;
-    selD.appendChild(opt);
-  });
+async function loadData() {
+  try {
+    const res = await fetch(SHEET_URL);
+    const json = await res.json();
+    allData = json.data || [];
+    filteredData = [...allData];
+    populateFilters();
+    renderTable();
+  } catch (err) {
+    alert("Gagal load data: " + err.message);
+  }
 }
 
-// render tabel
+// Render table sesuai filteredData
 function renderTable() {
   const tbody = document.getElementById("tableBody");
   tbody.innerHTML = "";
-
-  filteredData.forEach((d, i) => {
-    // main row
+  filteredData.forEach(d => {
     const tr = document.createElement("tr");
-    tr.className = "border-b hover:bg-gray-50 pointer";
-    tr.onclick = () => {
-      const next = tr.nextElementSibling;
-      next.style.display = next.style.display === "table-row" ? "none" : "table-row";
-    };
+    tr.className = "border-b hover:bg-gray-50";
+
+    const medsosStr = d.medsos ? Object.entries(d.medsos).map(([k,v]) => `${k}: ${v}`).join(" | ") : "";
 
     tr.innerHTML = `
-      <td class="p-2">${i+1}</td>
-      <td class="p-2">${d.nama}</td>
-      <td class="p-2">${d.nik}</td>
-      <td class="p-2">${d.kta}</td>
-      <td class="p-2">${d.alamat}</td>
-      <td class="p-2">${new Date(d.tanggal).toLocaleDateString()}</td>
+      <td class="py-2 px-4 border">${d.nama || ""}</td>
+      <td class="py-2 px-4 border">${d.nik || ""}</td>
+      <td class="py-2 px-4 border">${d.kta || ""}</td>
+      <td class="py-2 px-4 border">${d.alamat || ""}</td>
+      <td class="py-2 px-4 border">${(d.pendidikanFormal || []).map(p=>p.nama + " ("+p.tahun+")").join(" | ")}</td>
+      <td class="py-2 px-4 border">${(d.pendidikanKader || []).map(p=>p.nama + " ("+p.tahun+")").join(" | ")}</td>
+      <td class="py-2 px-4 border">${(d.jabatanPartai || []).map(j=>j.nama + " ("+j.tingkatan+", "+j.periode+")").join(" | ")}</td>
+      <td class="py-2 px-4 border">${(d.organisasi || []).map(o=>o.nama + " ("+o.jabatan+", "+o.tingkatan+", "+o.periode+")").join(" | ")}</td>
+      <td class="py-2 px-4 border">${d.skill?.bahasa?.join(", ") || ""}</td>
+      <td class="py-2 px-4 border">${d.skill?.komputer || ""}</td>
+      <td class="py-2 px-4 border">${medsosStr}</td>
+      <td class="py-2 px-4 border">${new Date(d.tanggal).toLocaleString()}</td>
     `;
     tbody.appendChild(tr);
-
-    // expand row
-    const expandTr = document.createElement("tr");
-    expandTr.className = "expand-row bg-gray-50";
-    const td = document.createElement("td");
-    td.colSpan = 6;
-    td.className = "p-3 text-sm text-gray-700";
-
-    td.innerHTML = `
-      <b>Pendidikan Formal:</b> ${(d.pendidikanFormal || []).map(p => `${p.nama} (${p.tahun})`).join(", ") || "-"} <br>
-      <b>Pendidikan Kader:</b> ${(d.pendidikanKader || []).map(k => `${k.nama} (${k.tahun})`).join(", ") || "-"} <br>
-      <b>Jabatan Partai:</b> ${(d.jabatanPartai || []).map(j => `${j.nama} (${j.tingkatan}, ${j.periode})`).join(", ") || "-"} <br>
-      <b>Organisasi:</b> ${(d.organisasi || []).map(o => `${o.nama} (${o.jabatan}, ${o.tingkatan}, ${o.periode})`).join(", ") || "-"} <br>
-      <b>Skill Bahasa:</b> ${d.bahasa || "-"} <br>
-      <b>Komputer:</b> ${d.komputer || "-"} <br>
-      <b>Media Sosial:</b> ${d.medsos ? Object.entries(d.medsos).map(([k,v]) => `${k}: ${v}`).join(", ") : "-"}
-    `;
-    expandTr.appendChild(td);
-    tbody.appendChild(expandTr);
   });
 }
 
-// search & filter
-document.getElementById("searchBox").addEventListener("input", e => {
-  const val = e.target.value.toLowerCase();
-  filteredData = data.filter(d => 
-    d.nama.toLowerCase().includes(val) || 
-    d.nik.toLowerCase().includes(val) ||
-    d.kta.toLowerCase().includes(val)
-  );
-  applyFilters();
-});
+// Populate filter dropdown
+function populateFilters() {
+  const pendidikanSet = new Set();
+  const diklatSet = new Set();
+  allData.forEach(d=>{
+    (d.pendidikanFormal || []).forEach(p=> pendidikanSet.add(p.nama));
+    (d.pendidikanKader || []).forEach(k=> diklatSet.add(k.nama));
+  });
+  const filterPendidikan = document.getElementById("filterPendidikan");
+  const filterDiklat = document.getElementById("filterDiklat");
 
+  pendidikanSet.forEach(p=> {
+    const opt = document.createElement("option");
+    opt.value = p;
+    opt.text = p;
+    filterPendidikan.appendChild(opt);
+  });
+
+  diklatSet.forEach(k=> {
+    const opt = document.createElement("option");
+    opt.value = k;
+    opt.text = k;
+    filterDiklat.appendChild(opt);
+  });
+}
+
+// Search & Filter
+document.getElementById("searchBox").addEventListener("input", applyFilters);
 document.getElementById("filterPendidikan").addEventListener("change", applyFilters);
 document.getElementById("filterDiklat").addEventListener("change", applyFilters);
 
 function applyFilters() {
-  const pendidikanVal = document.getElementById("filterPendidikan").value;
-  const diklatVal = document.getElementById("filterDiklat").value;
+  const search = document.getElementById("searchBox").value.toLowerCase();
+  const pendidikan = document.getElementById("filterPendidikan").value;
+  const diklat = document.getElementById("filterDiklat").value;
 
-  filteredData = data.filter(d => {
-    const pedMatch = pendidikanVal === "" || (d.pendidikanFormal || []).some(p => p.nama === pendidikanVal);
-    const diklatMatch = diklatVal === "" || (d.pendidikanKader || []).some(k => k.nama === diklatVal);
-    return pedMatch && diklatMatch;
+  filteredData = allData.filter(d => {
+    const matchSearch = [d.nama,d.nik,d.kta].some(v => v.toLowerCase().includes(search));
+    const matchPendidikan = pendidikan ? (d.pendidikanFormal || []).some(p=>p.nama === pendidikan) : true;
+    const matchDiklat = diklat ? (d.pendidikanKader || []).some(k=>k.nama === diklat) : true;
+    return matchSearch && matchPendidikan && matchDiklat;
   });
-
-  const searchVal = document.getElementById("searchBox").value.toLowerCase();
-  if(searchVal) {
-    filteredData = filteredData.filter(d => 
-      d.nama.toLowerCase().includes(searchVal) || 
-      d.nik.toLowerCase().includes(searchVal) ||
-      d.kta.toLowerCase().includes(searchVal)
-    );
-  }
 
   renderTable();
 }
@@ -164,13 +153,58 @@ function resetFilters() {
   document.getElementById("searchBox").value = "";
   document.getElementById("filterPendidikan").value = "";
   document.getElementById("filterDiklat").value = "";
-  filteredData = [...data];
+  filteredData = [...allData];
   renderTable();
 }
 
-// init
-populateFilters();
-renderTable();
+// Export CSV
+function exportCSV() {
+  if(filteredData.length === 0){
+    alert("Tidak ada data untuk di-export!");
+    return;
+  }
+
+  const headers = [
+    "Nama","NIK","KTA","Alamat","RT","RW","Kelurahan","Kecamatan","Kabupaten","HP",
+    "Pendidikan Formal","Pendidikan Kader","Jabatan Partai","Organisasi",
+    "Skill Bahasa","Komputer","Media Sosial","Tanggal Submit"
+  ];
+
+  const rows = filteredData.map(d => [
+    d.nama || "",
+    d.nik || "",
+    d.kta || "",
+    d.alamat || "",
+    d.rt || "",
+    d.rw || "",
+    d.kelurahan || "",
+    d.kecamatan || "",
+    d.kabupaten || "",
+    d.hp || "",
+    (d.pendidikanFormal || []).map(p => `${p.nama} (${p.tahun})`).join(" | "),
+    (d.pendidikanKader || []).map(k => `${k.nama} (${k.tahun})`).join(" | "),
+    (d.jabatanPartai || []).map(j => `${j.nama} (${j.tingkatan}, ${j.periode})`).join(" | "),
+    (d.organisasi || []).map(o => `${o.nama} (${o.jabatan}, ${o.tingkatan}, ${o.periode})`).join(" | "),
+    d.skill?.bahasa?.join(", ") || "",
+    d.skill?.komputer || "",
+    d.medsos ? Object.entries(d.medsos).map(([k,v]) => `${k}: ${v}`).join(" | ") : "",
+    new Date(d.tanggal).toLocaleString()
+  ]);
+
+  let csvContent = [headers, ...rows].map(e => e.map(a => `"${a}"`).join(",")).join("\n");
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "Data_Kader.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Load data on start
+loadData();
 
 </script>
 
