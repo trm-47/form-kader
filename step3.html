@@ -3,19 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Step 9 – Review & Kirim</title>
+<title>Step 3 – Pendidikan Formal</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
 
-<div class="max-w-2xl mx-auto p-4">
-<div class="bg-white rounded-2xl shadow-xl p-6 space-y-6">
-<h2 class="text-lg font-bold text-center">Review & Kirim</h2>
+<div class="max-w-md mx-auto p-4">
+<div class="bg-white rounded-2xl shadow-xl p-6 space-y-4">
 
-<div id="review"></div>
+<h2 class="text-lg font-bold text-center">Pendidikan Formal</h2>
+
+<div id="list"></div>
+
+<button onclick="tambah()" class="w-full border border-dashed py-3 rounded-xl text-sm">+ Tambah Pendidikan</button>
 
 <div class="flex gap-3 pt-2">
-  <button onclick="kirimData()" class="w-full bg-red-700 text-white py-3 rounded-xl font-semibold">✅ Kirim Data</button>
+  <button onclick="kembali()" class="w-1/2 border py-3 rounded-xl font-semibold">Kembali</button>
+  <button onclick="lanjut()" class="w-1/2 bg-red-700 text-white py-3 rounded-xl font-semibold">Lanjut</button>
 </div>
 
 </div></div>
@@ -23,76 +27,49 @@
 <script>
 const data = JSON.parse(localStorage.getItem("formKader") || "{}");
 if (!data.nik) window.location.href = "step1.html";
+data.pendidikanFormal = data.pendidikanFormal || [];
 
-const review = document.getElementById("review");
+function tambah(val={}) {
+  const idx = data.pendidikanFormal.length;
+  data.pendidikanFormal.push(val);
 
-function buatSection(title, contentHtml, stepUrl) {
   const div = document.createElement("div");
-  div.className = "space-y-2 border-b pb-2";
-
-  const h = document.createElement("div");
-  h.className = "flex justify-between items-center";
-  h.innerHTML = `<h3 class="font-semibold text-gray-700">${title}</h3>
-                 <button onclick="window.location.href='${stepUrl}'" class="text-sm text-blue-600 hover:underline">✏️ Edit</button>`;
-  div.appendChild(h);
-
-  const content = document.createElement("div");
-  content.innerHTML = contentHtml;
-  div.appendChild(content);
-  return div;
+  div.className = "border rounded-xl p-3 space-y-2 mt-3";
+  div.innerHTML = `
+    <select class="w-full p-2 border rounded" onchange="data.pendidikanFormal[${idx}].jenjang=this.value">
+      <option value="">Pilih Jenjang</option>
+      <option value="SD">SD</option>
+      <option value="SMP">SMP</option>
+      <option value="SMA">SMA</option>
+      <option value="D1">D1</option>
+      <option value="D2">D2</option>
+      <option value="D3">D3</option>
+      <option value="S1">S1</option>
+      <option value="S2">S2</option>
+      <option value="S3">S3</option>
+    </select>
+    <input class="w-full p-2 border rounded mt-1" placeholder="Nama Sekolah/Universitas" oninput="data.pendidikanFormal[${idx}].nama=this.value">
+    <input class="w-full p-2 border rounded mt-1" placeholder="Tahun Lulus" oninput="data.pendidikanFormal[${idx}].tahun=this.value">
+    <select class="w-full p-2 border rounded mt-1" onchange="
+      if(this.value){data.pendidikanFormal[${idx}].jurusan=this.value} else {data.pendidikanFormal[${idx}].jurusan=''};">
+      <option value="">Jurusan (SMA/D1-S3)</option>
+      <option value="IPA">IPA</option>
+      <option value="IPS">IPS</option>
+      <option value="Bahasa">Bahasa</option>
+      <option value="Fakultas/Jurusan">Fakultas/Jurusan</option>
+    </select>
+  `;
+  list.appendChild(div);
 }
 
-// Review Data
-review.appendChild(buatSection("Data Pribadi",
-`<p class="text-sm">Nama: ${data.nama || "-"}</p>
-<p class="text-sm">NIK: ${data.nik || "-"}</p>
-<p class="text-sm">Nomor KTA: ${data.kta || "-"}</p>`, "step1.html"));
-
-review.appendChild(buatSection("Alamat & Kontak",
-`<p class="text-sm">Alamat: ${data.alamat || "-"}</p>
-<p class="text-sm">RT/RW: ${data.rt || "-"} / ${data.rw || "-"}</p>
-<p class="text-sm">Kelurahan: ${data.kelurahan || "-"}</p>
-<p class="text-sm">Kecamatan: ${data.kecamatan || "-"}</p>
-<p class="text-sm">Kabupaten/Kota: ${data.kabupaten || "-"}</p>
-<p class="text-sm">HP: ${data.hp || "-"}</p>`, "step2.html"));
-
-function listHtml(arr, fields) {
-  return (arr || []).map((it,i)=>{
-    return `<p class="text-sm">${i+1}. ${fields.map(f=>`${f.label}: ${it[f.key]||"-"}`).join(" | ")}</p>`;
-  }).join("");
+function lanjut() {
+  localStorage.setItem("formKader", JSON.stringify(data));
+  window.location.href = "step4.html";
 }
 
-review.appendChild(buatSection("Pendidikan Formal", listHtml(data.pendidikanFormal || [], [{key:"nama",label:"Nama"},{key:"tahun",label:"Tahun"},{key:"jurusan",label:"Jurusan"}]), "step3.html"));
-review.appendChild(buatSection("Pendidikan Kader", listHtml(data.pendidikanKader || [], [{key:"nama",label:"Nama"},{key:"tahun",label:"Tahun"},{key:"penyelenggara",label:"Penyelenggara"}]), "step4.html"));
-review.appendChild(buatSection("Riwayat Jabatan Partai", listHtml(data.jabatanPartai || [], [{key:"nama",label:"Nama Jabatan"},{key:"tingkatan",label:"Tingkatan"},{key:"periode",label:"Periode"}]), "step5.html"));
-review.appendChild(buatSection("Riwayat Organisasi", listHtml(data.organisasi || [], [{key:"nama",label:"Nama"},{key:"jabatan",label:"Jabatan"},{key:"tingkatan",label:"Tingkatan"},{key:"periode",label:"Periode"}]), "step6.html"));
-review.appendChild(buatSection("Kompetensi & Skill",
-`<p class="text-sm">Bahasa: ${(data.skill?.bahasa || []).join(", ") || "-"}</p>
-<p class="text-sm">Komputer: ${data.skill?.komputer || "-"}</p>`, "step7.html"));
-review.appendChild(buatSection("Media Sosial",
-`<p class="text-sm">Instagram: ${data.medsos?.instagram || "-"}</p>
-<p class="text-sm">Twitter/X: ${data.medsos?.twitter || "-"}</p>
-<p class="text-sm">Facebook: ${data.medsos?.facebook || "-"}</p>
-<p class="text-sm">TikTok: ${data.medsos?.tiktok || "-"}</p>`, "step8.html"));
+function kembali() { window.location.href = "step2.html"; }
 
-async function kirimData() {
-  try {
-    const res = await fetch("PASTE_ENDPOINT_APPS_SCRIPT_DISINI", {
-      method: "POST",
-      body: JSON.stringify(data)
-    });
-    const result = await res.json();
-    if(result.status==="success") {
-      alert("Data berhasil dikirim!");
-      localStorage.removeItem("formKader");
-      window.location.href="step1.html";
-    } else {
-      alert("Gagal kirim data: "+result.message);
-    }
-  } catch(err) {
-    alert("Terjadi error: "+err.message);
-  }
-}
+if (data.pendidikanFormal.length === 0) tambah();
 </script>
 
 </body>
