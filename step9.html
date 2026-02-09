@@ -9,138 +9,68 @@
 <body class="bg-gray-100">
 
 <div class="max-w-2xl mx-auto p-4">
-  <div class="bg-white rounded-2xl shadow-xl p-6 space-y-6">
-    <h2 class="text-lg font-bold text-center">Review & Kirim</h2>
-    <div id="review"></div>
-    <div class="flex gap-3 pt-2">
-      <button onclick="kirimData()" class="w-full bg-red-700 text-white py-3 rounded-xl font-semibold">
-        ✅ Kirim Data
-      </button>
-    </div>
-  </div>
+<div class="bg-white rounded-2xl shadow-xl p-6 space-y-6">
+
+<h2 class="text-lg font-bold text-center">Review & Kirim</h2>
+
+<div id="review"></div>
+
+<div class="flex gap-3 pt-2">
+  <button onclick="kirimData()" class="w-full bg-red-700 text-white py-3 rounded-xl font-semibold">✅ Kirim Data</button>
 </div>
 
-<!-- Popup -->
-<div id="popup" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 hidden z-50">
-  <div class="bg-white rounded-2xl p-6 w-80 max-w-xs text-center shadow-xl space-y-4">
-    <div id="popupContent" class="text-gray-700 font-semibold"></div>
-    <button onclick="tutupPopup()" class="bg-red-700 text-white px-4 py-2 rounded-xl font-semibold">Tutup</button>
-  </div>
-</div>
+</div></div>
 
 <script>
 const data = JSON.parse(localStorage.getItem("formKader") || "{}");
-if (!data.nik) window.location.href = "step1.html";
+if(!data.nik) window.location.href="step1.html";
 
 const review = document.getElementById("review");
 
-// fungsi buat section dengan tombol edit
-function buatSection(title, contentHtml, stepUrl) {
+function buatSection(title, contentHtml){
   const div = document.createElement("div");
-  div.className = "space-y-2 border-b pb-2";
-
-  const h = document.createElement("div");
-  h.className = "flex justify-between items-center";
-  h.innerHTML = `<h3 class="font-semibold text-gray-700">${title}</h3>
-                 <button onclick="window.location.href='${stepUrl}'" class="text-sm text-blue-600 hover:underline">✏️ Edit</button>`;
-  div.appendChild(h);
-
-  const content = document.createElement("div");
-  content.innerHTML = contentHtml;
-  div.appendChild(content);
-
+  div.className="space-y-2 border-b pb-2";
+  div.innerHTML = `<h3 class="font-semibold text-gray-700">${title}</h3><div>${contentHtml}</div>`;
   return div;
 }
 
-// ================= DATA REVIEW =================
-
 // Data Pribadi
-let pribadiHtml = `
-<p class="text-sm text-gray-600">Nama: ${data.nama || "-"}</p>
-<p class="text-sm text-gray-600">NIK: ${data.nik || "-"}</p>
-<p class="text-sm text-gray-600">Nomor KTA: ${data.kta || "-"}</p>`;
-review.appendChild(buatSection("Data Pribadi", pribadiHtml, "step1.html"));
-
-// Alamat & Kontak
-let alamatHtml = `
-<p class="text-sm text-gray-600">Alamat: ${data.alamat || "-"}</p>
-<p class="text-sm text-gray-600">RT/RW: ${data.rt || "-"} / ${data.rw || "-"}</p>
-<p class="text-sm text-gray-600">Kelurahan: ${data.kelurahan || "-"}</p>
-<p class="text-sm text-gray-600">Kecamatan: ${data.kecamatan || "-"}</p>
-<p class="text-sm text-gray-600">Kabupaten/Kota: ${data.kabupaten || "-"}</p>
-<p class="text-sm text-gray-600">HP: ${data.hp || "-"}</p>`;
-review.appendChild(buatSection("Alamat & Kontak", alamatHtml, "step2.html"));
+let pribadiHtml = `Nama: ${data.nama}<br>NIK: ${data.nik}<br>KTA: ${data.kta}<br>
+<img src="${data.foto}" class="w-32 h-32 object-cover rounded-xl mt-2">`;
+review.appendChild(buatSection("Data Pribadi", pribadiHtml));
 
 // Pendidikan Formal
-let pendidikanFormalHtml = "";
-(data.pendidikanFormal || []).forEach((it, idx) => {
-  let jurusan = it.jurusan ? ` | Jurusan: ${it.jurusan}` : "";
-  pendidikanFormalHtml += `<p class="text-sm text-gray-600">${it.nama} (${it.tahun})${jurusan}</p>`;
+let pfHtml = "";
+(data.pendidikanFormal||[]).forEach(p=>{
+  pfHtml += `${p.nama} (${p.tahun})${p.jurusan ? " | "+p.jurusan : ""}<br>`;
 });
-review.appendChild(buatSection("Pendidikan Formal", pendidikanFormalHtml || "-", "step3.html"));
+review.appendChild(buatSection("Pendidikan Formal", pfHtml||"-"));
 
 // Pendidikan Kader
-let pendidikanKaderHtml = "";
-(data.pendidikanKader || []).forEach((it, idx) => {
-  pendidikanKaderHtml += `<p class="text-sm text-gray-600">${it.nama} (${it.tahun}) | ${it.penyelenggara}</p>`;
+let pkHtml = "";
+(data.pendidikanKader||[]).forEach(p=>{
+  pkHtml += `${p.nama} (${p.tahun}) | ${p.penyelenggara}<br>`;
 });
-review.appendChild(buatSection("Pendidikan Kader", pendidikanKaderHtml || "-", "step4.html"));
+review.appendChild(buatSection("Pendidikan Kader", pkHtml||"-"));
 
-// Riwayat Jabatan Partai
-let jabatanHtml = "";
-(data.riwayatJabatan || []).forEach((it, idx) => {
-  jabatanHtml += `<p class="text-sm text-gray-600">${it.nama} | ${it.tingkatan} | ${it.periode}</p>`;
-});
-review.appendChild(buatSection("Riwayat Jabatan Partai", jabatanHtml || "-", "step5.html"));
+// Tambahkan bagian lain sesuai step5-step8...
 
-// Riwayat Organisasi
-let orgHtml = "";
-(data.organisasi || []).forEach((it, idx) => {
-  orgHtml += `<p class="text-sm text-gray-600">${it.nama} | ${it.jabatan} | ${it.tingkatan} | ${it.periode}</p>`;
-});
-review.appendChild(buatSection("Riwayat Organisasi", orgHtml || "-", "step6.html"));
-
-// Kompetensi & Skill
-let skillHtml = `
-<p class="text-sm text-gray-600">Bahasa: ${(data.skill?.bahasa || []).join(", ") || "-"}</p>
-<p class="text-sm text-gray-600">Komputer: ${data.skill?.komputer || "-"}</p>`;
-review.appendChild(buatSection("Kompetensi & Skill", skillHtml, "step7.html"));
-
-// Media Sosial
-let medsosHtml = `
-<p class="text-sm text-gray-600">Instagram: ${data.medsos?.instagram || "-"}</p>
-<p class="text-sm text-gray-600">Twitter/X: ${data.medsos?.twitter || "-"}</p>
-<p class="text-sm text-gray-600">Facebook: ${data.medsos?.facebook || "-"}</p>
-<p class="text-sm text-gray-600">TikTok: ${data.medsos?.tiktok || "-"}</p>`;
-review.appendChild(buatSection("Media Sosial", medsosHtml, "step8.html"));
-
-// ================= POPUP =================
-function showPopup(message){
-  const popup = document.getElementById("popup");
-  const content = document.getElementById("popupContent");
-  content.innerHTML = message;
-  popup.classList.remove("hidden");
-}
-function tutupPopup(){ document.getElementById("popup").classList.add("hidden"); }
-
-// ================= KIRIM DATA =================
-async function kirimData() {
-  showPopup("Mengirim data, mohon tunggu...");
-  try {
-    const res = await fetch("PASTE_ENDPOINT_APPS_SCRIPT_DISINI", {
-      method: "POST",
-      body: JSON.stringify(data)
+async function kirimData(){
+  try{
+    const res = await fetch("PASTE_ENDPOINT_GAS_DISINI",{
+      method:"POST",
+      body:JSON.stringify(data)
     });
     const result = await res.json();
-    if(result.status === "success"){
-      showPopup("Data berhasil dikirim!");
+    if(result.status==="success"){
+      alert("Data berhasil dikirim!");
       localStorage.removeItem("formKader");
-      setTimeout(()=> window.location.href="terima.html", 1500);
-    } else {
-      showPopup("Gagal kirim data: " + result.message);
+      window.location.href="terima.html";
+    }else{
+      alert("Gagal kirim: "+result.message);
     }
-  } catch(err){
-    showPopup("Terjadi error: " + err.message);
+  }catch(err){
+    alert("Error: "+err.message);
   }
 }
 </script>
