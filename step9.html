@@ -103,6 +103,28 @@ function kirim() {
   localStorage.removeItem("formKader");
   window.location.href = "step1.html";
 }
+
+  async function kirimData() {
+  const data = JSON.parse(localStorage.getItem("formKader") || "{}");
+
+  try {
+    const res = await fetch("PASTE_ENDPOINT_APPS_SCRIPT_DISINI", {
+      method: "POST",
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if (result.status === "success") {
+      alert("Data berhasil dikirim!");
+      localStorage.removeItem("formKader");
+      window.location.href = "terima.html"; // halaman terima / sukses
+    } else {
+      alert("Gagal kirim data: " + result.message);
+    }
+  } catch (err) {
+    alert("Terjadi error: " + err.message);
+  }
+}
+
 </script>
 
 </body>
