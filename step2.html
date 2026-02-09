@@ -76,16 +76,11 @@
 
 <script>
 
-if (!localStorage.getItem("formKader")) {
-  window.location.href = "index.html";
-}
-
 const data = JSON.parse(localStorage.getItem("formKader") || "{}");
 
 if (!data.nik) {
   window.location.href = "index.html";
 }
-
 
 function lanjut() {
   data.alamat = alamat.value.trim();
