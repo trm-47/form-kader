@@ -11,6 +11,7 @@
 
 <h1 class="text-2xl font-bold mb-4 text-center">Admin Panel – Data Kader</h1>
 
+<!-- Search & Filter -->
 <div class="mb-4 flex gap-4 flex-wrap">
   <input type="text" id="search" placeholder="Search nama/NIK/KTA..." class="border p-2 rounded-xl flex-1">
   <select id="filterJenjang" class="border p-2 rounded-xl">
@@ -27,6 +28,7 @@
   </select>
 </div>
 
+<!-- Table -->
 <div class="overflow-x-auto">
   <table class="min-w-full bg-white rounded-xl shadow-lg overflow-hidden" id="table">
     <thead class="bg-red-700 text-white">
@@ -45,15 +47,33 @@
   </table>
 </div>
 
+<!-- Popup -->
+<div id="popup" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 hidden z-50">
+  <div class="bg-white rounded-2xl p-6 w-80 max-w-xs text-center shadow-xl space-y-4">
+    <div id="popupContent" class="text-gray-700 font-semibold"></div>
+    <button onclick="tutupPopup()" class="bg-red-700 text-white px-4 py-2 rounded-xl font-semibold">Tutup</button>
+  </div>
+</div>
+
 <script>
 const endpoint = "PASTE_DOGET_ENDPOINT_APPS_SCRIPT_DISINI";
 let allData = [];
 
+// Popup functions
+function showPopup(message){
+  const popup = document.getElementById("popup");
+  const content = document.getElementById("popupContent");
+  content.innerHTML = message;
+  popup.classList.remove("hidden");
+}
+function tutupPopup(){ document.getElementById("popup").classList.add("hidden"); }
+
+// Render table
 function renderTable(data) {
   const tbody = document.getElementById("tbody");
   tbody.innerHTML = "";
   data.forEach(d=>{
-    // Pendidikan HTML
+    // Pendidikan
     let pendidikanHtml = "";
     d.pendidikanFormal.forEach(p=>{
       let jurusan = p.jurusan ? ` | Jurusan: ${p.jurusan}` : "";
@@ -94,14 +114,17 @@ function renderTable(data) {
   });
 }
 
+// Fetch data
 async function fetchData() {
+  showPopup("Loading data, mohon tunggu...");
   try {
     const res = await axios.get(endpoint);
     allData = res.data;
     renderTable(allData);
+    tutupPopup();
   } catch(err) {
     console.error(err);
-    alert("Gagal ambil data.");
+    showPopup("Gagal ambil data: "+err.message);
   }
 }
 
@@ -111,11 +134,10 @@ document.getElementById("search").addEventListener("input", e=>{
   const filtered = allData.filter(d=>d.nama.toLowerCase().includes(q) || d.nik.includes(q) || d.kta.includes(q));
   renderTable(filtered);
 });
-
 document.getElementById("filterJenjang").addEventListener("change", e=>{
   const jenjang = e.target.value;
   const filtered = jenjang ? allData.filter(d=>{
-    return d.pendidikanFormal.some(p=>p.nama.toUpperCase().includes(jenjang.toUpperCase()));
+    return d.pendidikanFormal.some(p=>p.jenjang === jenjang);
   }) : allData;
   renderTable(filtered);
 });
