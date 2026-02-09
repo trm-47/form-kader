@@ -8,60 +8,82 @@
 </head>
 <body class="bg-gray-100">
 
-<div class="max-w-2xl mx-auto p-4">
+<div class="max-w-3xl mx-auto p-4">
 <div class="bg-white rounded-2xl shadow-xl p-6 space-y-6">
 
-<h2 class="text-lg font-bold text-center">Review & Kirim</h2>
+<h2 class="text-2xl font-bold text-center text-red-700">Review & Kirim Data Kader</h2>
 
-<div id="review"></div>
+<div id="review" class="space-y-4"></div>
 
 <div class="flex gap-3 pt-2">
-  <button onclick="kirimData()" class="w-full bg-red-700 text-white py-3 rounded-xl font-semibold">✅ Kirim Data</button>
+  <button onclick="kembali()" class="w-1/2 border py-3 rounded-xl font-semibold">Kembali</button>
+  <button onclick="kirimData()" class="w-1/2 bg-red-700 text-white py-3 rounded-xl font-semibold">✅ Kirim Data</button>
 </div>
 
 </div></div>
 
 <script>
-const data = JSON.parse(localStorage.getItem("formKader") || "{}");
+const data = JSON.parse(localStorage.getItem("formKader")||"{}");
 if(!data.nik) window.location.href="step1.html";
 
-const review = document.getElementById("review");
+const review=document.getElementById("review");
 
-function buatSection(title, contentHtml){
-  const div = document.createElement("div");
-  div.className="space-y-2 border-b pb-2";
-  div.innerHTML = `<h3 class="font-semibold text-gray-700">${title}</h3><div>${contentHtml}</div>`;
+function buatSection(title, htmlContent, stepUrl){
+  const div=document.createElement("div");
+  div.className="border p-4 rounded-xl space-y-2";
+  div.innerHTML=`<div class="flex justify-between items-center"><h3 class="font-semibold text-gray-700">${title}</h3>
+    <button onclick="window.location.href='${stepUrl}'" class="text-sm text-blue-600 hover:underline">✏️ Edit</button></div>
+    <div>${htmlContent}</div>`;
   return div;
 }
 
 // Data Pribadi
-let pribadiHtml = `Nama: ${data.nama}<br>NIK: ${data.nik}<br>KTA: ${data.kta}<br>
-<img src="${data.foto}" class="w-32 h-32 object-cover rounded-xl mt-2">`;
-review.appendChild(buatSection("Data Pribadi", pribadiHtml));
+let pribadiHtml=`<p>Nama: ${data.nama||"-"}</p>
+<p>NIK: ${data.nik||"-"}</p>
+<p>KTA: ${data.kta||"-"}</p>`;
+review.appendChild(buatSection("Data Pribadi", pribadiHtml,"step1.html"));
+
+// Alamat
+let alamatHtml=`<p>Alamat: ${data.alamat||"-"}</p>
+<p>RT/RW: ${data.rt||"-"}/${data.rw||"-"}</p>
+<p>Kelurahan: ${data.kelurahan||"-"}</p>
+<p>Kecamatan: ${data.kecamatan||"-"}</p>
+<p>Kabupaten/Kota: ${data.kabupaten||"-"}</p>
+<p>HP: ${data.hp||"-"}</p>`;
+review.appendChild(buatSection("Alamat & Kontak",alamatHtml,"step2.html"));
 
 // Pendidikan Formal
-let pfHtml = "";
-(data.pendidikanFormal||[]).forEach(p=>{
-  pfHtml += `${p.nama} (${p.tahun})${p.jurusan ? " | "+p.jurusan : ""}<br>`;
-});
-review.appendChild(buatSection("Pendidikan Formal", pfHtml||"-"));
+let pfHtml=(data.pendidikanFormal||[]).map(p=>`${p.jenjang} | ${p.nama} (${p.tahun}) ${p.jurusan? "| Jurusan: "+p.jurusan:""}`).join("<br>")||"-";
+review.appendChild(buatSection("Pendidikan Formal",pfHtml,"step3.html"));
 
 // Pendidikan Kader
-let pkHtml = "";
-(data.pendidikanKader||[]).forEach(p=>{
-  pkHtml += `${p.nama} (${p.tahun}) | ${p.penyelenggara}<br>`;
-});
-review.appendChild(buatSection("Pendidikan Kader", pkHtml||"-"));
+let pkHtml=(data.pendidikanKader||[]).map(p=>`${p.nama} (${p.tahun}) | ${p.penyelenggara}`).join("<br>")||"-";
+review.appendChild(buatSection("Pendidikan Kader",pkHtml,"step4.html"));
 
-// Tambahkan bagian lain sesuai step5-step8...
+// Riwayat Jabatan Partai
+let jabHtml=(data.jabatanPartai||[]).map(j=>`${j.nama} | ${j.tingkatan} | ${j.periode||"-"}`).join("<br>")||"-";
+review.appendChild(buatSection("Riwayat Jabatan Partai",jabHtml,"step5.html"));
 
+// Riwayat Organisasi
+let orgHtml=(data.organisasi||[]).map(o=>`${o.nama} | ${o.jabatan} | ${o.tingkatan} | ${o.periode||"-"}`).join("<br>")||"-";
+review.appendChild(buatSection("Riwayat Organisasi",orgHtml,"step6.html"));
+
+// Kompetensi
+let skillHtml=`Bahasa: ${(data.skill?.bahasa||[]).join(", ")||"-"}<br>Komputer: ${data.skill?.komputer||"-"}`;
+review.appendChild(buatSection("Kompetensi & Skill",skillHtml,"step7.html"));
+
+// Media Sosial
+let medsosHtml=`IG: ${data.medsos?.instagram||"-"} | TW: ${data.medsos?.twitter||"-"} | FB: ${data.medsos?.facebook||"-"} | TT: ${data.medsos?.tiktok||"-"}`;
+review.appendChild(buatSection("Media Sosial",medsosHtml,"step8.html"));
+
+// Kirim
 async function kirimData(){
   try{
-    const res = await fetch("https://script.google.com/macros/s/AKfycbxcZqExieC2H5zw3FHkwRVcpS_3hsrmPIwluH0dnmzmIk1BYjDAk2lyVQHArK8CA7zW/exec",{
+    const res=await fetch("PASTE_ENDPOINT_GAS_DISINI",{
       method:"POST",
       body:JSON.stringify(data)
     });
-    const result = await res.json();
+    const result=await res.json();
     if(result.status==="success"){
       alert("Data berhasil dikirim!");
       localStorage.removeItem("formKader");
@@ -73,6 +95,8 @@ async function kirimData(){
     alert("Error: "+err.message);
   }
 }
+
+function kembali(){ window.location.href="step8.html"; }
 </script>
 
 </body>
