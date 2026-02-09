@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Step 8 – Media Sosial</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    const data = JSON.parse(localStorage.getItem("formKader") || "{}");
+    if (!data.nik) window.location.href = "index.html";
+    data.medsos = data.medsos || {};
+  </script>
+</head>
+<body class="bg-gray-100">
+
+<div class="max-w-md mx-auto p-4">
+  <div class="bg-white rounded-2xl shadow-xl p-6 space-y-4">
+    <h2 class="text-lg font-bold text-center">Media Sosial (Opsional)</h2>
+
+    <div class="flex flex-col gap-3">
+      <label>Instagram:
+        <input type="text" id="instagram" placeholder="Instagram" class="border p-1 rounded w-full" />
+      </label>
+      <label>Twitter (X):
+        <input type="text" id="twitter" placeholder="Twitter/X" class="border p-1 rounded w-full" />
+      </label>
+      <label>Facebook:
+        <input type="text" id="facebook" placeholder="Facebook" class="border p-1 rounded w-full" />
+      </label>
+      <label>TikTok:
+        <input type="text" id="tiktok" placeholder="TikTok" class="border p-1 rounded w-full" />
+      </label>
+    </div>
+
+    <div class="flex gap-3 pt-2">
+      <button onclick="kembali()" class="w-1/2 border py-3 rounded-xl font-semibold">Kembali</button>
+      <button onclick="lanjut()" class="w-1/2 bg-red-700 text-white py-3 rounded-xl font-semibold">Lanjut</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const instagram = document.getElementById('instagram');
+const twitter = document.getElementById('twitter');
+const facebook = document.getElementById('facebook');
+const tiktok = document.getElementById('tiktok');
+
+// Restore saved data
+if (data.medsos) {
+  instagram.value = data.medsos.instagram || "";
+  twitter.value = data.medsos.twitter || "";
+  facebook.value = data.medsos.facebook || "";
+  tiktok.value = data.medsos.tiktok || "";
+}
+
+function lanjut() {
+  data.medsos.instagram = instagram.value;
+  data.medsos.twitter = twitter.value;
+  data.medsos.facebook = facebook.value;
+  data.medsos.tiktok = tiktok.value;
+
+  localStorage.setItem("formKader", JSON.stringify(data));
+  window.location.href = "step9.html";
+}
+
+function kembali() {
+  localStorage.setItem("formKader", JSON.stringify(data));
+  window.location.href = "step7.html";
+}
+</script>
+
+</body>
+</html>
