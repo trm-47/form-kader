@@ -57,7 +57,7 @@ review.appendChild(buatSection("Pendidikan Kader", pkHtml||"-"));
 
 async function kirimData(){
   try{
-    const res = await fetch("PASTE_ENDPOINT_GAS_DISINI",{
+    const res = await fetch("https://script.google.com/macros/s/AKfycbxcZqExieC2H5zw3FHkwRVcpS_3hsrmPIwluH0dnmzmIk1BYjDAk2lyVQHArK8CA7zW/exec",{
       method:"POST",
       body:JSON.stringify(data)
     });
