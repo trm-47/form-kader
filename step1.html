@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Step 1 – Data Pribadi</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Step 1 – Data Pribadi</title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
 
@@ -27,37 +27,21 @@
       <input id="kta" class="w-full mt-1 p-3 border rounded-xl" placeholder="Nomor KTA PDI Perjuangan">
     </div>
 
-    <button onclick="lanjut()" class="w-full bg-red-700 text-white py-3 rounded-xl font-semibold">
-      Lanjut
-    </button>
+    <button onclick="lanjut()" class="w-full bg-red-700 text-white py-3 rounded-xl font-semibold">Lanjut</button>
   </div>
 </div>
 
 <script>
-const data = JSON.parse(localStorage.getItem("formKader") || "{}");
-
 function lanjut() {
-  const namaVal = nama.value.trim();
-  const nikVal = nik.value.trim();
-  const ktaVal = kta.value.trim();
-
-  if (!namaVal || !nikVal) {
-    alert("Nama dan NIK wajib diisi");
-    return;
-  }
-
-  data.nama = namaVal;
-  data.nik = nikVal;
-  data.kta = ktaVal;
-
+  const data = {
+    nama: nama.value.trim(),
+    nik: nik.value.trim(),
+    kta: kta.value.trim()
+  };
+  if (!data.nama || !data.nik) { alert("Nama dan NIK wajib diisi"); return; }
   localStorage.setItem("formKader", JSON.stringify(data));
   window.location.href = "step2.html";
 }
-
-// Isi ulang jika data sudah ada
-if (data.nama) nama.value = data.nama;
-if (data.nik) nik.value = data.nik;
-if (data.kta) kta.value = data.kta;
 </script>
 
 </body>
