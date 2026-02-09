@@ -12,46 +12,47 @@
 
 <h2 class="text-lg font-bold text-center">Alamat & Kontak</h2>
 
-<div>
-  <label class="text-sm text-gray-600">Alamat Lengkap</label>
-  <textarea id="alamat" class="w-full mt-1 p-3 border rounded-xl" rows="2" placeholder="Alamat lengkap"></textarea>
-</div>
+<div><label class="text-sm text-gray-600">Alamat Lengkap</label>
+<textarea id="alamat" class="w-full mt-1 p-3 border rounded-xl" rows="2"></textarea></div>
 
 <div class="grid grid-cols-2 gap-3">
-  <div><label class="text-sm text-gray-600">RT</label><input id="rt" class="w-full mt-1 p-3 border rounded-xl" placeholder="RT"></div>
-  <div><label class="text-sm text-gray-600">RW</label><input id="rw" class="w-full mt-1 p-3 border rounded-xl" placeholder="RW"></div>
+  <div><label class="text-sm text-gray-600">RT</label>
+  <input id="rt" class="w-full mt-1 p-3 border rounded-xl"></div>
+  <div><label class="text-sm text-gray-600">RW</label>
+  <input id="rw" class="w-full mt-1 p-3 border rounded-xl"></div>
 </div>
 
-<div><label class="text-sm text-gray-600">Kelurahan</label><input id="kelurahan" class="w-full mt-1 p-3 border rounded-xl" placeholder="Kelurahan"></div>
-<div><label class="text-sm text-gray-600">Kecamatan</label><input id="kecamatan" class="w-full mt-1 p-3 border rounded-xl" placeholder="Kecamatan"></div>
-<div><label class="text-sm text-gray-600">Kabupaten / Kota</label><input id="kabupaten" class="w-full mt-1 p-3 border rounded-xl" placeholder="Kabupaten / Kota"></div>
-<div><label class="text-sm text-gray-600">Nomor HP</label><input id="hp" class="w-full mt-1 p-3 border rounded-xl" placeholder="08xxxxxxxxxx"></div>
+<div><label class="text-sm text-gray-600">Kelurahan</label>
+<input id="kelurahan" class="w-full mt-1 p-3 border rounded-xl"></div>
 
-<div class="flex gap-3">
-  <button onclick="kembali()" class="w-1/2 border border-gray-300 py-3 rounded-xl font-semibold">Kembali</button>
-  <button onclick="lanjut()" class="w-1/2 bg-red-700 text-white py-3 rounded-xl font-semibold">Lanjut</button>
+<div><label class="text-sm text-gray-600">Kecamatan</label>
+<input id="kecamatan" class="w-full mt-1 p-3 border rounded-xl"></div>
+
+<div><label class="text-sm text-gray-600">Kabupaten / Kota</label>
+<input id="kabupaten" class="w-full mt-1 p-3 border rounded-xl"></div>
+
+<div><label class="text-sm text-gray-600">Nomor HP</label>
+<input id="hp" class="w-full mt-1 p-3 border rounded-xl"></div>
+
+<div class="flex gap-3 pt-2">
+<button onclick="kembali()" class="w-1/2 border py-3 rounded-xl font-semibold">Kembali</button>
+<button onclick="lanjut()" class="w-1/2 bg-red-700 text-white py-3 rounded-xl font-semibold">Lanjut</button>
 </div>
 
 </div></div>
 
 <script>
-const data = JSON.parse(localStorage.getItem("formKader") || "{}");
-if (!data.nik) window.location.href = "step1.html";
-  if(!/^\d+$/.test(rt.value.trim()) || !/^\d+$/.test(rw.value.trim())) {
-  alert("RT/RW harus angka");
-  return;
-}
-if(!/^\d{10,15}$/.test(hp.value.trim())) {
-  alert("No HP harus 10–15 digit angka");
-  return;
-}
-if(email.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
-  alert("Email tidak valid");
-  return;
-}
+const data = JSON.parse(localStorage.getItem("formKader")||"{}");
+if(!data.nik) window.location.href="step1.html";
 
+function lanjut(){
+  if(!/^\d+$/.test(rt.value.trim()) || !/^\d+$/.test(rw.value.trim())){
+    alert("RT/RW harus angka"); return;
+  }
+  if(!/^\d{10,15}$/.test(hp.value.trim())){
+    alert("HP harus 10–15 digit angka"); return;
+  }
 
-function lanjut() {
   data.alamat = alamat.value.trim();
   data.rt = rt.value.trim();
   data.rw = rw.value.trim();
@@ -59,11 +60,12 @@ function lanjut() {
   data.kecamatan = kecamatan.value.trim();
   data.kabupaten = kabupaten.value.trim();
   data.hp = hp.value.trim();
+  
   localStorage.setItem("formKader", JSON.stringify(data));
-  window.location.href = "step3.html";
+  window.location.href="step3.html";
 }
-function kembali() { window.location.href = "step1.html"; }
-</script>
 
+function kembali(){ window.location.href="step1.html"; }
+</script>
 </body>
 </html>
