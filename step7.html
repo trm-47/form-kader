@@ -1,58 +1,63 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Step 7 – Kompetensi & Skill</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Step 7 – Kompetensi & Skill</title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
 
 <div class="max-w-md mx-auto p-4">
-  <div class="bg-white rounded-2xl shadow-xl p-6 space-y-4">
-    <h2 class="text-lg font-bold text-center">Kompetensi & Skill</h2>
+<div class="bg-white rounded-2xl shadow-xl p-6 space-y-4">
 
-    <div>
-      <label class="block text-sm text-gray-600">Bahasa</label>
-      <label><input type="checkbox" value="Indonesia" id="bahasaInd"> Indonesia</label>
-      <label><input type="checkbox" value="Inggris" id="bahasaIng"> Inggris</label>
-      <label><input type="checkbox" value="Mandarin" id="bahasaMan"> Mandarin</label>
-      <input type="text" id="bahasaLain" placeholder="Lainnya" class="w-full p-2 border rounded mt-1">
-    </div>
+<h2 class="text-lg font-bold text-center">Kompetensi & Skill</h2>
 
-    <div>
-      <label class="block text-sm text-gray-600">Kemampuan Komputer</label>
-      <label><input type="radio" name="komputer" value="Tidak Bisa"> Tidak Bisa</label>
-      <label><input type="radio" name="komputer" value="Bisa"> Bisa</label>
-      <label><input type="radio" name="komputer" value="Advance"> Advance</label>
-    </div>
-
-    <div class="flex gap-3 pt-2">
-      <button onclick="kembali()" class="w-1/2 border py-3 rounded-xl font-semibold">Kembali</button>
-      <button onclick="lanjut()" class="w-1/2 bg-red-700 text-white py-3 rounded-xl font-semibold">Lanjut</button>
-    </div>
-  </div>
+<h3 class="font-semibold text-gray-700">Bahasa</h3>
+<div class="flex gap-3">
+  <label><input type="checkbox" value="Indonesia" id="bindo"> Indonesia</label>
+  <label><input type="checkbox" value="Inggris" id="binggris"> Inggris</label>
+  <label><input type="checkbox" value="Mandarin" id="bmandarin"> Mandarin</label>
+  <label><input type="checkbox" value="Lainnya" id="blainnya"> Lainnya</label>
+  <input type="text" id="blainnyaText" placeholder="Lainnya" class="border rounded p-1">
 </div>
+
+<h3 class="font-semibold text-gray-700">Kemampuan Komputer</h3>
+<div class="flex gap-3">
+  <label><input type="radio" name="komputer" value="Tidak Bisa"> Tidak Bisa</label>
+  <label><input type="radio" name="komputer" value="Bisa"> Bisa</label>
+  <label><input type="radio" name="komputer" value="Advance"> Advance</label>
+</div>
+
+<div class="flex gap-3 pt-2">
+  <button onclick="kembali()" class="w-1/2 border py-3 rounded-xl font-semibold">Kembali</button>
+  <button onclick="lanjut()" class="w-1/2 bg-red-700 text-white py-3 rounded-xl font-semibold">Lanjut</button>
+</div>
+
+</div></div>
 
 <script>
 const data = JSON.parse(localStorage.getItem("formKader") || "{}");
 if (!data.nik) window.location.href = "step1.html";
-data.skill = data.skill || { bahasa: [], komputer: "" };
-
-// isi ulang jika sudah ada
-const bahasaMap = {Indonesia:"bahasaInd", Inggris:"bahasaIng", Mandarin:"bahasaMan"};
-data.skill.bahasa.forEach(b => { if(bahasaMap[b]) document.getElementById(bahasaMap[b]).checked = true; });
-bahasaLain.value = data.skill.bahasa.filter(b => !["Indonesia","Inggris","Mandarin"].includes(b)).join(", ");
-if(data.skill.komputer) document.querySelectorAll('input[name="komputer"]').forEach(r=>{if(r.value===data.skill.komputer) r.checked=true});
+data.skill = data.skill || {};
 
 function lanjut() {
-  const bahasa = [];
-  if(bahasaInd.checked) bahasa.push("Indonesia");
-  if(bahasaIng.checked) bahasa.push("Inggris");
-  if(bahasaMan.checked) bahasa.push("Mandarin");
-  if(bahasaLain.value.trim()) bahasa.push(...bahasaLain.value.split(",").map(s=>s.trim()));
+  let bahasa = [];
+  ["bindo","binggris","bmandarin"].forEach(id=>{
+    if(document.getElementById(id).checked) bahasa.push(document.getElementById(id).value);
+  });
+  if(document.getElementById("blainnya").checked && blainnyaText.value.trim()) bahasa.push(blainnyaText.value.trim());
 
-  const komputer = document.querySelector('input[name="komputer"]:checked')?.value || "";
+  data.skill.bahasa = bahasa;
+  const komp = document.querySelector('input[name="komputer"]:checked');
+  data.skill.komputer = komp ? komp.value : "";
+  
+  localStorage.setItem("formKader", JSON.stringify(data));
+  window.location.href = "step8.html";
+}
 
-  data.skill = { bahasa, komputer };
-  localStorage.s
+function kembali() { window.location.href = "step6.html"; }
+</script>
+
+</body>
+</html>
