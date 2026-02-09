@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Step 2 – Alamat & Kontak</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+
+<div class="max-w-md mx-auto p-4">
+  <div class="bg-white rounded-2xl shadow-xl p-6 space-y-4">
+
+    <h2 class="text-lg font-bold text-center">
+      Alamat & Kontak
+    </h2>
+
+    <div>
+      <label class="text-sm text-gray-600">Alamat Lengkap</label>
+      <textarea id="alamat" class="w-full mt-1 p-3 border rounded-xl"
+        rows="2" placeholder="Alamat lengkap"></textarea>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="text-sm text-gray-600">RT</label>
+        <input id="rt" class="w-full mt-1 p-3 border rounded-xl"
+          placeholder="RT">
+      </div>
+      <div>
+        <label class="text-sm text-gray-600">RW</label>
+        <input id="rw" class="w-full mt-1 p-3 border rounded-xl"
+          placeholder="RW">
+      </div>
+    </div>
+
+    <div>
+      <label class="text-sm text-gray-600">Kelurahan</label>
+      <input id="kelurahan" class="w-full mt-1 p-3 border rounded-xl"
+        placeholder="Kelurahan">
+    </div>
+
+    <div>
+      <label class="text-sm text-gray-600">Kecamatan</label>
+      <input id="kecamatan" class="w-full mt-1 p-3 border rounded-xl"
+        placeholder="Kecamatan">
+    </div>
+
+    <div>
+      <label class="text-sm text-gray-600">Kabupaten / Kota</label>
+      <input id="kabupaten" class="w-full mt-1 p-3 border rounded-xl"
+        placeholder="Kabupaten / Kota">
+    </div>
+
+    <div>
+      <label class="text-sm text-gray-600">Nomor HP</label>
+      <input id="hp" class="w-full mt-1 p-3 border rounded-xl"
+        placeholder="08xxxxxxxxxx">
+    </div>
+
+    <div class="flex gap-3">
+      <button onclick="kembali()"
+        class="w-1/2 border border-gray-300 py-3 rounded-xl font-semibold">
+        Kembali
+      </button>
+
+      <button onclick="lanjut()"
+        class="w-1/2 bg-red-700 text-white py-3 rounded-xl font-semibold">
+        Lanjut
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const data = JSON.parse(localStorage.getItem("formKader")) || {};
+
+function lanjut() {
+  data.alamat = alamat.value.trim();
+  data.rt = rt.value.trim();
+  data.rw = rw.value.trim();
+  data.kelurahan = kelurahan.value.trim();
+  data.kecamatan = kecamatan.value.trim();
+  data.kabupaten = kabupaten.value.trim();
+  data.hp = hp.value.trim();
+
+  localStorage.setItem("formKader", JSON.stringify(data));
+  window.location.href = "step3.html";
+}
+
+function kembali() {
+  window.location.href = "step1.html";
+}
+</script>
+
+</body>
+</html>
