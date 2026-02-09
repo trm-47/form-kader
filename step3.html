@@ -28,18 +28,6 @@
 const data = JSON.parse(localStorage.getItem("formKader") || "{}");
 if (!data.nik) window.location.href = "step1.html";
 data.pendidikanFormal = data.pendidikanFormal || [];
-if(!tahun.value.trim() || !/^\d{4}$/.test(tahun.value.trim())){
-  alert("Tahun harus 4 digit angka");
-  return;
-}
-if(jenjang==='SMA' && !jurusanVal){
-  alert("Pilih jurusan SMA");
-  return;
-}
-if(['D1','D2','D3','S1','S2','S3'].includes(jenjang) && (!fakultas.value.trim() || !jurusanVal)){
-  alert("Fakultas dan jurusan harus diisi untuk jenjang D1–S3");
-  return;
-}
 
 // Fungsi tambah pendidikan
 function tambah(val={}) {
@@ -110,7 +98,18 @@ function lanjut() {
   localStorage.setItem("formKader", JSON.stringify(data));
   window.location.href = "step4.html";
 }
-
+if(!tahun.value.trim() || !/^\d{4}$/.test(tahun.value.trim())){
+  alert("Tahun harus 4 digit angka");
+  return;
+}
+if(jenjang==='SMA' && !jurusanVal){
+  alert("Pilih jurusan SMA");
+  return;
+}
+if(['D1','D2','D3','S1','S2','S3'].includes(jenjang) && (!fakultas.value.trim() || !jurusanVal)){
+  alert("Fakultas dan jurusan harus diisi untuk jenjang D1–S3");
+  return;
+}
 function kembali() { 
   window.location.href = "step2.html"; 
 }
