@@ -11,10 +11,11 @@
 
 <h1 class="text-2xl font-bold mb-4 text-center">Admin Panel – Data Kader</h1>
 
-<div class="mb-4 flex gap-4 flex-wrap">
-  <input type="text" id="search" placeholder="Search nama/NIK/KTA..." class="border p-2 rounded-xl flex-1">
-  <select id="filterJenjang" class="border p-2 rounded-xl">
-    <option value="">Filter Jenjang Pendidikan</option>
+<div class="mb-4 flex flex-wrap gap-4">
+  <input type="text" id="search" placeholder="Search Nama / NIK / KTA..." class="border p-2 rounded-xl flex-1">
+  
+  <select id="filterPendidikanFormal" class="border p-2 rounded-xl">
+    <option value="">Filter Pendidikan Formal</option>
     <option value="SD">SD</option>
     <option value="SMP">SMP</option>
     <option value="SMA">SMA</option>
@@ -25,18 +26,24 @@
     <option value="S2">S2</option>
     <option value="S3">S3</option>
   </select>
+
+  <select id="filterPendidikanKader" class="border p-2 rounded-xl">
+    <option value="">Filter Pendidikan Kader</option>
+  </select>
 </div>
 
 <div class="overflow-x-auto">
   <table class="min-w-full bg-white rounded-xl shadow-lg overflow-hidden" id="table">
     <thead class="bg-red-700 text-white">
       <tr>
-        <th class="px-4 py-2">Foto</th>
         <th class="px-4 py-2">Nama</th>
         <th class="px-4 py-2">NIK</th>
         <th class="px-4 py-2">KTA</th>
         <th class="px-4 py-2">Pendidikan Formal</th>
         <th class="px-4 py-2">Pendidikan Kader</th>
+        <th class="px-4 py-2">Jabatan Partai</th>
+        <th class="px-4 py-2">Organisasi</th>
+        <th class="px-4 py-2">Kompetensi</th>
       </tr>
     </thead>
     <tbody id="tbody"></tbody>
@@ -44,39 +51,48 @@
 </div>
 
 <!-- Modal Resume -->
-<div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center">
-  <div class="bg-white rounded-xl p-6 max-w-3xl w-full overflow-auto max-h-[90vh]">
+<div id="modalResume" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-start pt-10 z-50">
+  <div class="bg-white rounded-2xl w-11/12 md:w-3/4 max-h-[90vh] overflow-y-auto p-6 relative">
+    <button onclick="closeModal()" class="absolute top-3 right-3 text-red-700 font-bold text-xl">✖</button>
     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-2xl font-bold">Resume Kader</h2>
-      <button onclick="closeModal()" class="text-red-600 font-bold text-xl">&times;</button>
+      <h2 class="text-2xl font-bold text-gray-700">Resume Kader</h2>
+      <img src="URL_LOGO_PDI" alt="Logo PDI" class="h-16">
     </div>
-    <div class="flex gap-4 mb-4">
-      <img id="modalFoto" src="" class="w-36 h-48 object-cover rounded shadow-md">
-      <div id="modalContent" class="flex-1"></div>
+    <div class="flex justify-center mb-4">
+      <img id="modalFoto" src="" alt="Foto Kader" class="rounded shadow-md" style="width:180px; height:240px; object-fit:cover;">
     </div>
+    <div id="modalContent" class="space-y-2 text-gray-700"></div>
   </div>
 </div>
 
 <script>
-const endpoint = "https://script.google.com/macros/s/AKfycbw__QRUl0CB1rxUz4ENTGGHA2ohR0VqyvEtrk--ZzXPOXkYu5vDHh_FtVsOqWg8d8Tf/exec";
+const endpoint = "https://script.google.com/macros/s/AKfycbz57U2Ep-g6RHuBRHO9gA1OHMuKDuW8zV8Adj6KtGxjbluk_vYmO5sPteDEMQJgeNP-/exec"; // Ganti URL GAS
 let allData = [];
 
 function renderTable(data){
   const tbody = document.getElementById("tbody");
   tbody.innerHTML = "";
-  data.forEach((d, idx)=>{
-    let pendidikanFormal = d.pendidikanFormal.map(p=>`${p.nama} (${p.tahun})`).join("<br>");
-    let pendidikanKader = d.pendidikanKader.map(p=>`${p.nama} (${p.tahun}) | ${p.penyelenggara}`).join("<br>");
-    tbody.innerHTML += `
-      <tr class="border-b cursor-pointer hover:bg-gray-100" onclick="openModal(${idx})">
-        <td class="px-4 py-2"><img src="${d.fotoUrl||'https://via.placeholder.com/100x133'}" class="w-16 h-20 object-cover rounded"></td>
-        <td class="px-4 py-2">${d.nama}</td>
-        <td class="px-4 py-2">${d.nik}</td>
-        <td class="px-4 py-2">${d.kta}</td>
-        <td class="px-4 py-2">${pendidikanFormal}</td>
-        <td class="px-4 py-2">${pendidikanKader}</td>
-      </tr>
+  data.forEach(d=>{
+    let pendidikanFormal = d.pendidikanFormal.map(p=>`${p.nama} (${p.tahun}) ${p.jurusan? '| '+p.jurusan:''}`).join('<br>') || '-';
+    let pendidikanKader = d.pendidikanKader.map(p=>`${p.nama} (${p.tahun}) | ${p.penyelenggara}`).join('<br>') || '-';
+    let jabatan = d.jabatanPartai.map(j=>`${j.nama} | ${j.tingkatan} | ${j.periode}`).join('<br>') || '-';
+    let organisasi = d.organisasi.map(o=>`${o.nama} | ${o.jabatan} | ${o.tingkatan} | ${o.periode}`).join('<br>') || '-';
+    let skill = `Bahasa: ${d.skillBahasa.join(", ")} | Komputer: ${d.kemampuanKomputer}`;
+
+    const tr = document.createElement("tr");
+    tr.className = "border-b cursor-pointer hover:bg-gray-100";
+    tr.innerHTML = `
+      <td class="px-4 py-2">${d.nama}</td>
+      <td class="px-4 py-2">${d.nik}</td>
+      <td class="px-4 py-2">${d.kta}</td>
+      <td class="px-4 py-2">${pendidikanFormal}</td>
+      <td class="px-4 py-2">${pendidikanKader}</td>
+      <td class="px-4 py-2">${jabatan}</td>
+      <td class="px-4 py-2">${organisasi}</td>
+      <td class="px-4 py-2">${skill}</td>
     `;
+    tr.addEventListener("click", ()=>showResume(d));
+    tbody.appendChild(tr);
   });
 }
 
@@ -85,50 +101,71 @@ async function fetchData(){
     const res = await axios.get(endpoint);
     allData = res.data;
     renderTable(allData);
+
+    // Populate filter Pendidikan Kader
+    const filterKader = document.getElementById("filterPendidikanKader");
+    let semuaDiklat = new Set();
+    allData.forEach(d=>d.pendidikanKader.forEach(p=>semuaDiklat.add(p.nama)));
+    filterKader.innerHTML = '<option value="">Filter Pendidikan Kader</option>' + Array.from(semuaDiklat).map(x=>`<option value="${x}">${x}</option>`).join('');
+
   }catch(err){
     console.error(err);
     alert("Gagal ambil data.");
   }
 }
 
-function openModal(idx){
-  const d = allData[idx];
-  document.getElementById("modalFoto").src = d.fotoUrl||'https://via.placeholder.com/180x240';
-  let html = `
-    <p><strong>Nama:</strong> ${d.nama}</p>
-    <p><strong>NIK:</strong> ${d.nik}</p>
-    <p><strong>No KTA:</strong> ${d.kta}</p>
-    <p><strong>Alamat:</strong> ${d.alamat} | RT/RW: ${d.rt}/${d.rw}</p>
-    <p><strong>Kel/Kec/Kab:</strong> ${d.kelurahan}/${d.kecamatan}/${d.kabupaten}</p>
-    <p><strong>HP:</strong> ${d.hp}</p>
-    <p><strong>Pendidikan Formal:</strong><br>${d.pendidikanFormal.map(p=>`${p.nama} (${p.tahun}) | ${p.jurusan||''}`).join("<br>")}</p>
-    <p><strong>Pendidikan Kader:</strong><br>${d.pendidikanKader.map(p=>`${p.nama} (${p.tahun}) | ${p.penyelenggara}`).join("<br>")}</p>
-    <p><strong>Jabatan Partai:</strong><br>${d.jabatanPartai.map(j=>`${j.nama} | ${j.tingkatan} | ${j.periode}`).join("<br>")}</p>
-    <p><strong>Organisasi:</strong><br>${d.organisasi.map(o=>`${o.nama} | ${o.jabatan} | ${o.tingkatan} | ${o.periode}`).join("<br>")}</p>
-    <p><strong>Bahasa:</strong> ${d.skillBahasa.join(", ")}</p>
-    <p><strong>Komputer:</strong> ${d.kemampuanKomputer}</p>
-    <p><strong>Media Sosial:</strong> IG:${d.medsos.instagram||'-'} | TW:${d.medsos.twitter||'-'} | FB:${d.medsos.facebook||'-'} | TT:${d.medsos.tiktok||'-'}</p>
+document.getElementById("search").addEventListener("input", e=>{
+  const q = e.target.value.toLowerCase();
+  renderTable(allData.filter(d=>d.nama.toLowerCase().includes(q) || d.nik.includes(q) || d.kta.includes(q)));
+});
+
+document.getElementById("filterPendidikanFormal").addEventListener("change", e=>{
+  const val = e.target.value;
+  const filtered = val ? allData.filter(d=>d.pendidikanFormal.some(p=>p.jenjang===val)) : allData;
+  renderTable(filtered);
+});
+
+document.getElementById("filterPendidikanKader").addEventListener("change", e=>{
+  const val = e.target.value;
+  const filtered = val ? allData.filter(d=>d.pendidikanKader.some(p=>p.nama===val)) : allData;
+  renderTable(filtered);
+});
+
+// Modal
+function showResume(d){
+  document.getElementById("modalFoto").src = d.foto || "https://via.placeholder.com/180x240?text=No+Photo";
+  const modalContent = document.getElementById("modalContent");
+  modalContent.innerHTML = `
+    <h3 class="font-semibold">Data Pribadi</h3>
+    <p>Nama: ${d.nama}</p>
+    <p>NIK: ${d.nik}</p>
+    <p>KTA: ${d.kta}</p>
+    <p>Alamat: ${d.alamat} | RT/RW: ${d.rt}/${d.rw}</p>
+    <p>Kel/ Kec / Kab: ${d.kelurahan} / ${d.kecamatan} / ${d.kabupaten}</p>
+    <p>HP: ${d.hp}</p>
+
+    <h3 class="font-semibold mt-2">Pendidikan Formal</h3>
+    ${d.pendidikanFormal.map(p=>`<p>${p.nama} (${p.tahun}) ${p.jurusan? '| '+p.jurusan:''}</p>`).join("") || '-'}
+
+    <h3 class="font-semibold mt-2">Pendidikan Kader</h3>
+    ${d.pendidikanKader.map(p=>`<p>${p.nama} (${p.tahun}) | ${p.penyelenggara}</p>`).join("") || '-'}
+
+    <h3 class="font-semibold mt-2">Jabatan Partai</h3>
+    ${d.jabatanPartai.map(j=>`<p>${j.nama} | ${j.tingkatan} | ${j.periode}</p>`).join("") || '-'}
+
+    <h3 class="font-semibold mt-2">Organisasi</h3>
+    ${d.organisasi.map(o=>`<p>${o.nama} | ${o.jabatan} | ${o.tingkatan} | ${o.periode}</p>`).join("") || '-'}
+
+    <h3 class="font-semibold mt-2">Kompetensi & Skill</h3>
+    <p>Bahasa: ${d.skillBahasa.join(", ") || '-'}</p>
+    <p>Komputer: ${d.kemampuanKomputer || '-'}</p>
   `;
-  document.getElementById("modalContent").innerHTML = html;
-  document.getElementById("modal").classList.remove("hidden");
+  document.getElementById("modalResume").classList.remove("hidden");
 }
 
 function closeModal(){
-  document.getElementById("modal").classList.add("hidden");
+  document.getElementById("modalResume").classList.add("hidden");
 }
-
-// Search & filter
-document.getElementById("search").addEventListener("input", e=>{
-  const q = e.target.value.toLowerCase();
-  const filtered = allData.filter(d=>d.nama.toLowerCase().includes(q)||d.nik.includes(q)||d.kta.includes(q));
-  renderTable(filtered);
-});
-
-document.getElementById("filterJenjang").addEventListener("change", e=>{
-  const jenjang = e.target.value;
-  const filtered = jenjang ? allData.filter(d=>d.pendidikanFormal.some(p=>p.jenjang==jenjang)) : allData;
-  renderTable(filtered);
-});
 
 fetchData();
 </script>
