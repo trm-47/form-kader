@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Step 9 – Review & Kirim</title>
+<title>Step 9 – Resume & Kirim</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
@@ -25,102 +25,84 @@
     <div id="resume" class="space-y-4 text-gray-700"></div>
 
     <div class="flex gap-3 pt-4">
-      <button onclick="window.location.href='step1.html'" class="w-1/2 bg-gray-300 text-gray-700 py-3 rounded-xl font-semibold">🔄 Edit / Ulangi</button>
-      <button onclick="kirimData()" class="w-1/2 bg-red-700 text-white py-3 rounded-xl font-semibold">✅ Kirim ke Spreadsheet</button>
+      <button onclick="kirimData()" class="w-full bg-red-700 text-white py-3 rounded-xl font-semibold">✅ Kirim Data</button>
     </div>
+
   </div>
 </div>
 
 <script>
-// Ambil data dari localStorage
-const data = JSON.parse(localStorage.getItem("formKader") || "{}");
-if(!data.nik) window.location.href = "step1.html";
+const data = JSON.parse(localStorage.getItem("formKader")||"{}");
+if(!data.nik) window.location.href="step1.html";
 
-// Foto kader
-document.getElementById("fotoKader").src = data.fotoUrl || "https://via.placeholder.com/180x240?text=No+Photo";
+// Tampilkan foto
+document.getElementById("fotoKader").src = data.fotoUrl || data.fotoBase64 || "https://via.placeholder.com/180x240?text=No+Photo";
 
 const resumeDiv = document.getElementById("resume");
-
-// Fungsi membuat section resume
-function buatSection(title, contentHtml){
+function buatSection(title, html){
   const div = document.createElement("div");
   div.className = "border-b pb-2";
-  div.innerHTML = `<h3 class="font-semibold text-gray-700">${title}</h3>${contentHtml}`;
+  div.innerHTML = `<h3 class="font-semibold text-gray-700">${title}</h3>${html}`;
   return div;
 }
 
 // Data Pribadi
-let htmlPribadi = `
-<p>Nama: ${data.nama || "-"}</p>
-<p>NIK: ${data.nik || "-"}</p>
-<p>No KTA: ${data.kta || "-"}</p>
-<p>Alamat: ${data.alamat || "-"} | RT/RW: ${data.rt || "-"} / ${data.rw || "-"}</p>
-<p>Kelurahan/Kecamatan/Kabupaten: ${data.kelurahan || "-"} / ${data.kecamatan || "-"} / ${data.kabupaten || "-"}</p>
-<p>HP: ${data.hp || "-"}</p>`;
-resumeDiv.appendChild(buatSection("Data Pribadi", htmlPribadi));
+resumeDiv.appendChild(buatSection("Data Pribadi", `
+<p>Nama: ${data.nama||"-"}</p>
+<p>NIK: ${data.nik||"-"}</p>
+<p>No KTA: ${data.kta||"-"}</p>
+<p>HP: ${data.hp||"-"}</p>
+<p>Alamat: ${data.alamat||"-"} | RT/RW: ${data.rt||"-"}/${data.rw||"-"}</p>
+<p>Kel/ Kec / Kab: ${data.kelurahan||"-"} / ${data.kecamatan||"-"} / ${data.kabupaten||"-"}</p>
+`));
 
 // Pendidikan Formal
-let htmlPendidikanFormal = "";
-(data.pendidikanFormal||[]).forEach((p, idx)=>{
-  let jurusan = p.jurusan ? ` | Jurusan: ${p.jurusan}` : "";
-  htmlPendidikanFormal += `<p>${idx+1}. ${p.nama} (${p.tahun})${jurusan}</p>`;
-});
-resumeDiv.appendChild(buatSection("Pendidikan Formal", htmlPendidikanFormal || "-"));
+let pf = (data.pendidikanFormal||[]).map((p,i)=>`<p>${i+1}. ${p.nama} (${p.tahun}) ${p.jurusan? '| '+p.jurusan:''}</p>`).join("") || "-";
+resumeDiv.appendChild(buatSection("Pendidikan Formal", pf));
 
 // Pendidikan Kader
-let htmlPendidikanKader = "";
-(data.pendidikanKader||[]).forEach((p, idx)=>{
-  htmlPendidikanKader += `<p>${idx+1}. ${p.nama} (${p.tahun}) | ${p.penyelenggara}</p>`;
-});
-resumeDiv.appendChild(buatSection("Pendidikan Kader", htmlPendidikanKader || "-"));
+let pk = (data.pendidikanKader||[]).map((p,i)=>`<p>${i+1}. ${p.nama} (${p.tahun}) | ${p.penyelenggara}</p>`).join("") || "-";
+resumeDiv.appendChild(buatSection("Pendidikan Kader", pk));
 
-// Riwayat Jabatan Partai
-let htmlJabatan = "";
-(data.jabatanPartai||[]).forEach((j, idx)=>{
-  htmlJabatan += `<p>${idx+1}. ${j.nama} | ${j.tingkatan} | ${j.periode}</p>`;
-});
-resumeDiv.appendChild(buatSection("Riwayat Jabatan Partai", htmlJabatan || "-"));
+// Jabatan Partai
+let jp = (data.jabatanPartai||[]).map((j,i)=>`<p>${i+1}. ${j.nama} | ${j.tingkatan} | ${j.periode}</p>`).join("") || "-";
+resumeDiv.appendChild(buatSection("Riwayat Jabatan Partai", jp));
 
-// Riwayat Organisasi
-let htmlOrg = "";
-(data.organisasi||[]).forEach((o, idx)=>{
-  htmlOrg += `<p>${idx+1}. ${o.nama} | ${o.jabatan} | ${o.tingkatan} | ${o.periode}</p>`;
-});
-resumeDiv.appendChild(buatSection("Riwayat Organisasi", htmlOrg || "-"));
+// Organisasi
+let org = (data.organisasi||[]).map((o,i)=>`<p>${i+1}. ${o.nama} | ${o.jabatan} | ${o.tingkatan} | ${o.periode}</p>`).join("") || "-";
+resumeDiv.appendChild(buatSection("Riwayat Organisasi", org));
 
-// Kompetensi & Skill
-let htmlSkill = `
-<p>Bahasa: ${(data.skill?.bahasa||[]).join(", ") || "-"}</p>
-<p>Komputer: ${data.skill?.komputer || "-"}</p>`;
-resumeDiv.appendChild(buatSection("Kompetensi & Skill", htmlSkill));
+// Skill
+resumeDiv.appendChild(buatSection("Kompetensi & Skill", `
+<p>Bahasa: ${(data.skill?.bahasa||[]).join(", ")||"-"}</p>
+<p>Komputer: ${data.skill?.komputer||"-"}</p>
+`));
 
 // Media Sosial
-let htmlMedsos = `
-<p>Instagram: ${data.medsos?.instagram||"-"} | Twitter/X: ${data.medsos?.twitter||"-"}</p>
-<p>Facebook: ${data.medsos?.facebook||"-"} | TikTok: ${data.medsos?.tiktok||"-"}</p>`;
-resumeDiv.appendChild(buatSection("Media Sosial", htmlMedsos));
+resumeDiv.appendChild(buatSection("Media Sosial", `
+<p>IG: ${data.medsos?.instagram||"-"} | TW: ${data.medsos?.twitter||"-"}</p>
+<p>FB: ${data.medsos?.facebook||"-"} | TT: ${data.medsos?.tiktok||"-"}</p>
+`));
 
-// Kirim data ke Google Spreadsheet via Apps Script
-async function kirimData() {
-  const endpoint = "https://script.google.com/macros/s/AKfycbw__QRUl0CB1rxUz4ENTGGHA2ohR0VqyvEtrk--ZzXPOXkYu5vDHh_FtVsOqWg8d8Tf/exec"; 
-  try {
-    const res = await fetch(endpoint, {
-      method: "POST",
+// Kirim ke GAS
+async function kirimData(){
+  try{
+    const res = await fetch("https://script.google.com/macros/s/AKfycby2i1tbLLSaZejtC4MC-XkHHh5AbihiQOFX4_iS6I_b4ZMOf-XItLmRfH9z3YhJ3YAn/exec", {
+      method:"POST",
       body: JSON.stringify(data)
     });
     const result = await res.json();
-    if(result.status === "success"){
+    if(result.status==="success"){
       alert("Data berhasil dikirim!");
       localStorage.removeItem("formKader");
-      window.location.href = "terima.html";
+      window.location.href="terima.html";
     } else {
-      alert("Gagal kirim data: " + result.message);
+      alert("Gagal kirim data: "+result.message);
     }
-  } catch(err) {
-    alert("Terjadi error: " + err.message);
+  }catch(err){
+    alert("Terjadi error: "+err.message);
   }
 }
 </script>
-
 </body>
 </html>
