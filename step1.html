@@ -3,117 +3,79 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Step 1 – Data Pribadi</title>
+<title>Step 1 – Data Pribadi & Foto</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
 
 <div class="max-w-md mx-auto p-4">
   <div class="bg-white rounded-2xl shadow-xl p-6 space-y-4">
+    <h2 class="text-lg font-bold text-center">Data Pribadi & Foto</h2>
 
-    <h2 class="text-lg font-bold text-center">Data Pribadi Kader</h2>
+    <input class="w-full p-2 border rounded" placeholder="Nama" id="nama">
+    <input class="w-full p-2 border rounded" placeholder="NIK (16 angka)" id="nik">
+    <input class="w-full p-2 border rounded" placeholder="No KTA" id="kta">
+    <input class="w-full p-2 border rounded" placeholder="No HP" id="hp">
 
-    <!-- Nama Lengkap -->
-    <div>
-      <label class="text-sm text-gray-600">Nama Lengkap</label>
-      <input id="nama" class="w-full mt-1 p-3 border rounded-xl" placeholder="Nama lengkap sesuai KTP">
+    <h3 class="font-semibold text-gray-700">Foto Kader</h3>
+    <div class="flex flex-col gap-2">
+      <input type="file" id="fotoInput" accept="image/*">
+      <video id="video" class="rounded shadow-md" autoplay style="width:100%; max-height:240px;"></video>
+      <button onclick="takePhoto()" class="bg-red-700 text-white py-2 rounded">📸 Ambil Foto dari Camera</button>
+      <canvas id="canvas" class="hidden"></canvas>
+      <img id="preview" class="rounded shadow-md" style="width:180px; height:240px; object-fit:cover;">
     </div>
 
-    <!-- NIK -->
-    <div>
-      <label class="text-sm text-gray-600">NIK (16 digit)</label>
-      <input id="nik" class="w-full mt-1 p-3 border rounded-xl" placeholder="Nomor Induk Kependudukan" maxlength="16">
+    <div class="flex gap-3 pt-2">
+      <button onclick="lanjut()" class="w-full bg-red-700 text-white py-3 rounded-xl font-semibold">Lanjut</button>
     </div>
-
-    <!-- Nomor KTA -->
-    <div>
-      <label class="text-sm text-gray-600">Nomor KTA (angka)</label>
-      <input id="kta" class="w-full mt-1 p-3 border rounded-xl" placeholder="Nomor KTA PDI Perjuangan">
-    </div>
-
-    <!-- Foto Selfie -->
-    <div>
-      <label class="text-sm text-gray-600">Foto Selfie Kader</label>
-      <input type="file" accept="image/*" capture="user" id="fotoInput" class="w-full mt-1 p-2 border rounded-xl">
-      <img id="previewFoto" src="" class="mt-2 w-32 h-32 rounded-xl object-cover" style="display:none;">
-    </div>
-
-    <!-- Tombol Lanjut -->
-    <button onclick="lanjut()" class="w-full bg-red-700 text-white py-3 rounded-xl font-semibold">
-      Lanjut
-    </button>
 
   </div>
 </div>
 
 <script>
-const data = JSON.parse(localStorage.getItem("formKader") || "{}");
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const preview = document.getElementById('preview');
+const fotoInput = document.getElementById('fotoInput');
 
-// Redirect jika belum ada data
-if (!data) {
-  data = {};
+let fotoBase64 = "";
+
+// Ambil camera
+navigator.mediaDevices.getUserMedia({ video: true })
+.then(stream => video.srcObject = stream)
+.catch(err => console.error("Camera error: ", err));
+
+function takePhoto(){
+  canvas.width = 180;
+  canvas.height = 240;
+  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+  fotoBase64 = canvas.toDataURL('image/png');
+  preview.src = fotoBase64;
 }
 
-// Foto preview & simpan base64
-const fotoInput = document.getElementById("fotoInput");
-const previewFoto = document.getElementById("previewFoto");
-
-fotoInput.addEventListener("change", e=>{
+// Upload file
+fotoInput.addEventListener('change', (e)=>{
   const file = e.target.files[0];
-  if(file){
-    const reader = new FileReader();
-    reader.onload = function(evt){
-      previewFoto.src = evt.target.result;
-      previewFoto.style.display = "block";
-      data.foto = evt.target.result; // simpan base64
-    };
-    reader.readAsDataURL(file);
+  const reader = new FileReader();
+  reader.onload = function(event){
+    fotoBase64 = event.target.result;
+    preview.src = fotoBase64;
   }
+  reader.readAsDataURL(file);
 });
 
-function lanjut() {
-  const namaVal = nama.value.trim();
-  const nikVal = nik.value.trim();
-  const ktaVal = kta.value.trim();
-
-  // Validasi
-  if(!namaVal || !nikVal || !ktaVal){
-    alert("Nama, NIK dan KTA wajib diisi");
-    return;
-  }
-  if(!/^\d{16}$/.test(nikVal)){
-    alert("NIK harus 16 digit angka");
-    return;
-  }
-  if(!/^\d+$/.test(ktaVal)){
-    alert("KTA harus berupa angka");
-    return;
-  }
-  if(!data.foto){
-    alert("Foto selfie wajib diupload");
-    return;
-  }
-
-  // Simpan ke localStorage
-  data.nama = namaVal;
-  data.nik = nikVal;
-  data.kta = ktaVal;
-
+function lanjut(){
+  if(!fotoBase64) alert("Silakan pilih atau ambil foto!");
+  const data = JSON.parse(localStorage.getItem("formKader")||"{}");
+  data.nama = document.getElementById('nama').value;
+  data.nik = document.getElementById('nik').value;
+  data.kta = document.getElementById('kta').value;
+  data.hp = document.getElementById('hp').value;
+  data.fotoBase64 = fotoBase64;
   localStorage.setItem("formKader", JSON.stringify(data));
-
-  // Lanjut ke step2
-  window.location.href = "step2.html";
-}
-
-// Prefill jika ada data sebelumnya
-if(data.nama) nama.value = data.nama;
-if(data.nik) nik.value = data.nik;
-if(data.kta) kta.value = data.kta;
-if(data.foto){
-  previewFoto.src = data.foto;
-  previewFoto.style.display = "block";
+  window.location.href="step2.html";
 }
 </script>
-
 </body>
 </html>
