@@ -102,7 +102,7 @@ resumeDiv.appendChild(buatSection("Media Sosial", htmlMedsos));
 // =======================
 async function kirimData(){
   try{
-    const res = await fetch("PASTE_EXEC_URL_GAS_DISINI", {
+    const res = await fetch("https://script.google.com/macros/s/AKfycbwbKbrflheNZ12PTpKFK4DTg0os1hcTH24zAbGv9tZooxJ-vkfyh6yVJfCgl88PHdt0/exec", {
       method: "POST",
       body: JSON.stringify(data)
     });
