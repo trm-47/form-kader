@@ -102,7 +102,7 @@ resumeDiv.appendChild(buatSection("Media Sosial", htmlMedsos));
 
 // Kirim data ke Google Spreadsheet via Apps Script
 async function kirimData() {
-  const endpoint = "PASTE_ENDPOINT_DOPOST_APPS_SCRIPT_DISINI"; // <-- ganti dengan URL web app doPost Anda
+  const endpoint = "https://script.google.com/macros/s/AKfycbwirvQn8_xRSNaz3TTk02EDsDRx4hDyh09R7IX4x_uhUqUdU_0XsZ_DqRRSU73TbSPc/exec"; 
   try {
     const res = await fetch(endpoint, {
       method: "POST",
