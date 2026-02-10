@@ -11,20 +11,8 @@
 
 <h1 class="text-2xl font-bold mb-4 text-center">Admin Panel – Data Kader</h1>
 
-<!-- Form Pengaturan -->
-<div class="mb-4 p-4 bg-white rounded-xl shadow">
-  <h2 class="font-bold text-lg mb-2">Pengaturan Sistem</h2>
-  <label class="block mb-1">Folder ID Upload Foto:</label>
-  <input type="text" id="inputFolderID" class="border p-2 rounded w-full mb-2">
-  <label class="block mb-1">Exec URL GAS:</label>
-  <input type="text" id="inputExecURL" class="border p-2 rounded w-full mb-2">
-  <button onclick="simpanConfig()" class="bg-red-700 text-white px-4 py-2 rounded">Simpan</button>
-</div>
-
-<!-- Filter -->
-<div class="mb-4 flex flex-wrap gap-4">
+<div class="mb-4 flex gap-4 flex-wrap">
   <input type="text" id="search" placeholder="Search Nama / NIK / KTA..." class="border p-2 rounded-xl flex-1">
-  
   <select id="filterPendidikanFormal" class="border p-2 rounded-xl">
     <option value="">Filter Pendidikan Formal</option>
     <option value="SD">SD</option>
@@ -37,13 +25,11 @@
     <option value="S2">S2</option>
     <option value="S3">S3</option>
   </select>
-
   <select id="filterPendidikanKader" class="border p-2 rounded-xl">
     <option value="">Filter Pendidikan Kader</option>
   </select>
 </div>
 
-<!-- Tabel -->
 <div class="overflow-x-auto">
   <table class="min-w-full bg-white rounded-xl shadow-lg overflow-hidden" id="table">
     <thead class="bg-red-700 text-white">
@@ -53,87 +39,48 @@
         <th class="px-4 py-2">KTA</th>
         <th class="px-4 py-2">Pendidikan Formal</th>
         <th class="px-4 py-2">Pendidikan Kader</th>
-        <th class="px-4 py-2">Jabatan Partai</th>
-        <th class="px-4 py-2">Organisasi</th>
-        <th class="px-4 py-2">Kompetensi</th>
       </tr>
     </thead>
     <tbody id="tbody"></tbody>
   </table>
 </div>
 
-<!-- Modal Resume -->
-<div id="modalResume" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-start pt-10 z-50">
-  <div class="bg-white rounded-2xl w-11/12 md:w-3/4 max-h-[90vh] overflow-y-auto p-6 relative">
-    <button onclick="closeModal()" class="absolute top-3 right-3 text-red-700 font-bold text-xl">✖</button>
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-2xl font-bold text-gray-700">Resume Kader</h2>
-      <img src="https://i.ibb.co/5WyjxSkV/PDI-Perjuangan-3.png" alt="Logo PDI" class="h-16">
-    </div>
-    <div class="flex justify-center mb-4">
-      <img id="modalFoto" src="" alt="Foto Kader" class="rounded shadow-md" style="width:180px; height:240px; object-fit:cover;">
-    </div>
-    <div id="modalContent" class="space-y-2 text-gray-700"></div>
-  </div>
-</div>
-
 <script>
-// ===================== CONFIG =====================
-document.getElementById("inputFolderID").value = localStorage.getItem("FOLDER_ID")||"";
-document.getElementById("inputExecURL").value = localStorage.getItem("EXEC_URL")||"";
-
-function simpanConfig(){
-  const folderID = document.getElementById("inputFolderID").value.trim();
-  const execURL = document.getElementById("inputExecURL").value.trim();
-  if(!folderID || !execURL){ alert("Folder ID & Exec URL harus diisi!"); return; }
-  localStorage.setItem("FOLDER_ID", folderID);
-  localStorage.setItem("EXEC_URL", execURL);
-  alert("Konfigurasi tersimpan!");
-}
-
-// ===================== DATA & TABEL =====================
-let endpoint = localStorage.getItem("EXEC_URL") || "";
+const EXEC_URL = "https://script.google.com/macros/s/AKfycbySkvO7D2s7OpnzT4PYLZSYqxqn5WCDt86i26hsn0EXNt1A2OxGYGVsV6kW9h6ZKCBo/exec"; // manual
 let allData = [];
 
 async function fetchData(){
-  if(!endpoint){ alert("Exec URL belum diisi!"); return; }
   try{
-    const res = await axios.get(endpoint);
+    const res = await axios.get(EXEC_URL);
     allData = res.data;
     renderTable(allData);
 
-    // Populate filter Pendidikan Kader
+    // Populate filterPendidikanKader
     const filterKader = document.getElementById("filterPendidikanKader");
     let semuaDiklat = new Set();
     allData.forEach(d=>d.pendidikanKader.forEach(p=>semuaDiklat.add(p.nama)));
-    filterKader.innerHTML = '<option value="">Filter Pendidikan Kader</option>' + Array.from(semuaDiklat).map(x=>`<option value="${x}">${x}</option>`).join('');
+    filterKader.innerHTML = '<option value="">Filter Pendidikan Kader</option>' + 
+      Array.from(semuaDiklat).map(x=>`<option value="${x}">${x}</option>`).join('');
     
-  }catch(err){ console.error(err); alert("Gagal ambil data."); }
+  }catch(err){
+    console.error(err);
+    alert("Gagal ambil data.");
+  }
 }
 
 function renderTable(data){
   const tbody = document.getElementById("tbody");
   tbody.innerHTML = "";
   data.forEach(d=>{
-    const pendidikanFormal = d.pendidikanFormal.map(p=>`${p.nama} (${p.tahun}) ${p.jurusan? '| '+p.jurusan:''}`).join('<br>')||'-';
-    const pendidikanKader = d.pendidikanKader.map(p=>`${p.nama} (${p.tahun}) | ${p.penyelenggara}`).join('<br>')||'-';
-    const jabatan = d.jabatanPartai.map(j=>`${j.nama} | ${j.tingkatan} | ${j.periode}`).join('<br>')||'-';
-    const organisasi = d.organisasi.map(o=>`${o.nama} | ${o.jabatan} | ${o.tingkatan} | ${o.periode}`).join('<br>')||'-';
-    const skill = `Bahasa: ${d.skillBahasa.join(", ")} | Komputer: ${d.kemampuanKomputer}`;
-
+    let pf = d.pendidikanFormal.map(p=>`${p.nama} (${p.tahun}) ${p.jurusan? '| '+p.jurusan:''}`).join('<br>') || '-';
+    let pk = d.pendidikanKader.map(p=>`${p.nama} (${p.tahun}) | ${p.penyelenggara}`).join('<br>') || '-';
     const tr = document.createElement("tr");
     tr.className = "border-b cursor-pointer hover:bg-gray-100";
-    tr.innerHTML = `
-      <td class="px-4 py-2">${d.nama}</td>
-      <td class="px-4 py-2">${d.nik}</td>
-      <td class="px-4 py-2">${d.kta}</td>
-      <td class="px-4 py-2">${pendidikanFormal}</td>
-      <td class="px-4 py-2">${pendidikanKader}</td>
-      <td class="px-4 py-2">${jabatan}</td>
-      <td class="px-4 py-2">${organisasi}</td>
-      <td class="px-4 py-2">${skill}</td>
-    `;
-    tr.addEventListener("click", ()=>showResume(d));
+    tr.innerHTML = `<td class="px-4 py-2">${d.nama}</td>
+                    <td class="px-4 py-2">${d.nik}</td>
+                    <td class="px-4 py-2">${d.kta}</td>
+                    <td class="px-4 py-2">${pf}</td>
+                    <td class="px-4 py-2">${pk}</td>`;
     tbody.appendChild(tr);
   });
 }
@@ -141,56 +88,21 @@ function renderTable(data){
 // Filter
 document.getElementById("search").addEventListener("input", e=>{
   const q = e.target.value.toLowerCase();
-  const filtered = allData.filter(d=>d.nama.toLowerCase().includes(q) || d.nik.includes(q) || d.kta.includes(q));
+  const filtered = allData.filter(d=>d.nama.toLowerCase().includes(q)||d.nik.includes(q)||d.kta.includes(q));
   renderTable(filtered);
 });
+
 document.getElementById("filterPendidikanFormal").addEventListener("change", e=>{
   const val = e.target.value;
   const filtered = val ? allData.filter(d=>d.pendidikanFormal.some(p=>p.jenjang===val)) : allData;
   renderTable(filtered);
 });
+
 document.getElementById("filterPendidikanKader").addEventListener("change", e=>{
   const val = e.target.value;
   const filtered = val ? allData.filter(d=>d.pendidikanKader.some(p=>p.nama===val)) : allData;
   renderTable(filtered);
 });
-
-// Modal
-function showResume(d){
-  document.getElementById("modalFoto").src = d.foto || "https://via.placeholder.com/180x240?text=No+Photo";
-  const modalContent = document.getElementById("modalContent");
-  modalContent.innerHTML = `
-    <h3 class="font-semibold">Data Pribadi</h3>
-    <p>Nama: ${d.nama}</p>
-    <p>NIK: ${d.nik}</p>
-    <p>KTA: ${d.kta}</p>
-    <p>Alamat: ${d.alamat} | RT/RW: ${d.rt}/${d.rw}</p>
-    <p>Kel/ Kec / Kab: ${d.kelurahan} / ${d.kecamatan} / ${d.kabupaten}</p>
-    <p>HP: ${d.hp}</p>
-
-    <h3 class="font-semibold mt-2">Pendidikan Formal</h3>
-    ${d.pendidikanFormal.map(p=>`<p>${p.nama} (${p.tahun}) ${p.jurusan? '| '+p.jurusan:''}</p>`).join("") || '-'}
-
-    <h3 class="font-semibold mt-2">Pendidikan Kader</h3>
-    ${d.pendidikanKader.map(p=>`<p>${p.nama} (${p.tahun}) | ${p.penyelenggara}</p>`).join("") || '-'}
-
-    <h3 class="font-semibold mt-2">Jabatan Partai</h3>
-    ${d.jabatanPartai.map(j=>`<p>${j.nama} | ${j.tingkatan} | ${j.periode}</p>`).join("") || '-'}
-
-    <h3 class="font-semibold mt-2">Organisasi</h3>
-    ${d.organisasi.map(o=>`<p>${o.nama} | ${o.jabatan} | ${o.tingkatan} | ${o.periode}</p>`).join("") || '-'}
-
-    <h3 class="font-semibold mt-2">Kompetensi & Skill</h3>
-    <p>Bahasa: ${d.skillBahasa.join(", ") || '-'}</p>
-    <p>Komputer: ${d.kemampuanKomputer || '-'}</p>
-
-    <h3 class="font-semibold mt-2">Media Sosial</h3>
-    <p>IG: ${d.medsos.instagram||'-'} | TW: ${d.medsos.twitter||'-'}</p>
-    <p>FB: ${d.medsos.facebook||'-'} | TT: ${d.medsos.tiktok||'-'}</p>
-  `;
-  document.getElementById("modalResume").classList.remove("hidden");
-}
-function closeModal(){ document.getElementById("modalResume").classList.add("hidden"); }
 
 fetchData();
 </script>
