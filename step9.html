@@ -10,34 +10,37 @@
 
 <div class="max-w-3xl mx-auto p-4">
   <div class="bg-white rounded-2xl shadow-xl p-6">
-    
+
     <!-- Header Logo & Judul -->
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-2xl font-bold text-gray-700">Resume Kader</h2>
-      <img src="https://i.imghippo.com/files/LSfZ5782jAI.png" alt="Logo PDI" class="h-16">
+      <img src="URL_LOGO_PDI" alt="Logo PDI" class="h-16">
     </div>
-    
+
     <!-- Foto Kader -->
     <div class="flex justify-center mb-4">
       <img id="fotoKader" src="" alt="Foto Kader" class="rounded shadow-md" style="width:180px; height:240px; object-fit:cover;">
     </div>
 
+    <!-- Resume Detail -->
     <div id="resume" class="space-y-4 text-gray-700"></div>
 
     <div class="flex gap-3 pt-4">
-      <button onclick="window.location.href='step1.html'" class="w-full bg-red-700 text-white py-3 rounded-xl font-semibold">🔄 Edit / Ulangi</button>
+      <button onclick="window.location.href='step1.html'" class="w-1/2 border py-3 rounded-xl font-semibold">🔄 Edit / Ulangi</button>
+      <button onclick="kirimData()" class="w-1/2 bg-red-700 text-white py-3 rounded-xl font-semibold">✅ Kirim Data</button>
     </div>
+
   </div>
 </div>
 
 <script>
-const EXEC_URL = "https://script.google.com/macros/s/AKfycbwRx6oYG3XzZdmvKKePH0cavrg-2sZA6aHIlcv9L99LhMVNRw0jgu8AW2S-Kf7yUs6K/exec"; // manual
-const FOLDER_ID = "1B9fSt8jRqZuMcSQktr_SyQTntJXi8uxK"; // manual
+const endpoint = "PASTE_EXEC_URL_GAS_DI_SINI"; // <-- Ganti dengan Web App URL GAS
+const folderId = "MASUKAN_FOLDER_ID_DRIVE_DI_SINI"; // Folder khusus foto
 
 const data = JSON.parse(localStorage.getItem("formKader") || "{}");
 if(!data.nik) window.location.href = "step1.html";
 
-// Foto kader
+// tampilkan foto
 document.getElementById("fotoKader").src = data.fotoUrl || "https://via.placeholder.com/180x240?text=No+Photo";
 
 const resumeDiv = document.getElementById("resume");
@@ -100,22 +103,23 @@ let htmlMedsos = `
 <p>Facebook: ${data.medsos?.facebook||"-"} | TikTok: ${data.medsos?.tiktok||"-"}</p>`;
 resumeDiv.appendChild(buatSection("Media Sosial", htmlMedsos));
 
-// Kirim data ke GAS manual
-async function kirimData() {
-  try {
-    const res = await fetch(EXEC_URL, {
+// Kirim data ke GAS
+async function kirimData(){
+  try{
+    const res = await fetch(endpoint, {
       method: "POST",
-      body: JSON.stringify({...data, fotoBase64: data.fotoBase64})
+      body: JSON.stringify(data)
     });
     const result = await res.json();
-    if(result.status==="success"){
+    if(result.status === "success"){
       alert("Data berhasil dikirim!");
       localStorage.removeItem("formKader");
+      window.location.href = "terima.html";
     } else {
-      alert("Gagal kirim: "+result.message);
+      alert("Gagal kirim data: " + result.message);
     }
   } catch(err){
-    alert("Terjadi error: "+err.message);
+    alert("Terjadi error: " + err.message);
   }
 }
 </script>
